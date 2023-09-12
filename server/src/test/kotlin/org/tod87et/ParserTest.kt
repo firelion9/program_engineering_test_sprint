@@ -21,6 +21,6 @@ class ParserTest {
 
     @Test
     fun testEval() {
-        assertEquals(Parser.eval("42"), 42f)
+        assertEquals(Parser.eval("42"), 42.0)
     }
 }

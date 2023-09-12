@@ -5,15 +5,15 @@ class Parser private constructor(formula: String) {
         PLUS, MINUS, MULTIPLY, DIVIDE
     }
 
-    class EvalException(message: String) : Exception(message)
+    class EvalException(message: String): Exception(message)
 
     companion object {
 
         // Split by first number, sign or bracket
-        fun lex (s: String) : Pair<String, String> {
+        fun lex(s: String): Pair<String, String> {
             TODO()
         }
-        fun eval(formula: String): Float {
+        fun eval(formula: String): Double {
             TODO()
         }
     }
