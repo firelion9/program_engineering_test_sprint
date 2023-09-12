@@ -1,4 +1,4 @@
-package org.tod87et.client
+package org.tod87et.server
 
 fun main() {
     println("tod87et")

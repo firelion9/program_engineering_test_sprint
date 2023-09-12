@@ -1,4 +1,4 @@
-package org.tod87et.database
+package org.tod87et.server.database
 
 import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.Database
@@ -28,7 +28,7 @@ class FormulasDb(url: String, driver: String, user: String, password: String) {
             Formulas.insert {
                 it[Formulas.formula] = formula
                 it[Formulas.result] = result
-                it[Formulas.date] = LocalDateTime.now()
+                it[date] = LocalDateTime.now()
             }
         }
     }
