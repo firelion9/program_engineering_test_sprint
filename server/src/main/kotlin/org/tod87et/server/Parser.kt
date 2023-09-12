@@ -1,9 +1,6 @@
 package org.tod87et.server
-class Parser private constructor(formula: String) {
 
-    enum class CharType {
-        SIGN, DIGIT, BRACKET, NONE
-    }
+class Parser private constructor(formula: String) {
 
     class EvalException(message: String): Exception(message)
 
@@ -11,22 +8,24 @@ class Parser private constructor(formula: String) {
 
         // Split by first number, sign or bracket
         fun lex(s: String): Pair<String, String> {
-            var word: String = ""
+            var word = ""
             var wordContainsPoint = false
 
             for (c in s.withIndex()) {
-                if (c.value == ' ') {
-                    if (word.isEmpty()) continue;
+                if (c.value.isWhitespace()) {
+                    if (word.isEmpty()) continue
                     else return Pair(
                         word,
-                        s.slice(c.index .. s.length-1))
+                        s.slice(c.index until s.length-1)
+                    )
                 }
 
                 val isSignOrBracket = listOf('+', '-', '*', '/', '(', ')', '^').contains(c.value)
                 if (word.isEmpty() && isSignOrBracket) {
                     return Pair(
                         s.slice(c.index .. c.index),
-                        s.slice(c.index+1 .. s.length-1))
+                        s.slice(c.index+1 until s.length)
+                    )
                 }
 
                 val isPoint = c.value == '.'
@@ -40,7 +39,7 @@ class Parser private constructor(formula: String) {
                     wordContainsPoint = true
                 }
 
-                val isDigit = ('0'..'9').contains(c.value)
+                val isDigit = c.value.isDigit()
 
                 if (isDigit) {
                     word += c.value
