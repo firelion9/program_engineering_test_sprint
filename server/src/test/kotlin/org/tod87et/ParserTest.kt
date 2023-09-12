@@ -12,11 +12,13 @@ class ParserTest {
 
         assertEquals(Parser.lex("42.11"), Pair("42.11", ""))
 
-        assertEquals(Parser.lex("42 ("), Pair("42", "("))
+        assertEquals(Parser.lex("42 ("), Pair("42", " ("))
+
+        assertEquals(Parser.lex("   +42 ("), Pair("+", "42 ("))
 
         assertEquals(Parser.lex("+98 + 9"), Pair("+", "98 + 9"))
 
-        assertEquals(Parser.lex("+     98 + 9"), Pair("+", "98 + 9"))
+        assertEquals(Parser.lex("+     98 + 9"), Pair("+", "     98 + 9"))
     }
 
     @Test
