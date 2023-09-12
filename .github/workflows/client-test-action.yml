@@ -1,5 +1,5 @@
 name: Client CI
-run-name: ${{ github.actor }} is running Server CI
+run-name: ${{ github.actor }} is running Client CI
 on:
   push:
     paths-ignore:
