@@ -1,8 +1,8 @@
-package org.tod87et
+package org.server
 
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import org.tod87et.Parser
+import org.tod87et.server.Parser
 
 class ParserTest {
 

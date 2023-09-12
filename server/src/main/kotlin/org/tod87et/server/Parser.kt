@@ -1,4 +1,4 @@
-package org.tod87et
+package org.tod87et.server
 class Parser private constructor(formula: String) {
 
     enum class CharType {
