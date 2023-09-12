@@ -25,5 +25,5 @@ tasks.test {
 }
 
 application {
-    mainClass.set("org.tod87et.MainKt")
+    mainClass.set("org.tod87et.client.MainKt")
 }
