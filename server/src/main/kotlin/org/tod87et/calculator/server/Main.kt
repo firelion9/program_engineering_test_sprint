@@ -1,4 +1,4 @@
-package org.tod87et.server
+package org.tod87et.calculator.server
 
 fun main() {
     println("tod87et")

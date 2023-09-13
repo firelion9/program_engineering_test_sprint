@@ -1,4 +1,4 @@
-package org.tod87et.server.database
+package org.tod87et.calculator.server.database
 
 import java.time.LocalDateTime
 
