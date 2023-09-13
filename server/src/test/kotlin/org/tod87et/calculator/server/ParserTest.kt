@@ -1,8 +1,7 @@
-package org.server
+package org.tod87et.calculator.server
 
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import org.tod87et.server.Parser
 
 class ParserTest {
 
@@ -11,6 +10,10 @@ class ParserTest {
         assertEquals(Parser.lex("42"), Pair("42", ""))
 
         assertEquals(Parser.lex("42.11"), Pair("42.11", ""))
+
+        assertEquals(Parser.lex("(5"), Pair("(", "5"))
+
+        assertEquals(Parser.lex("42("), Pair("42", "("))
 
         assertEquals(Parser.lex("42 ("), Pair("42", " ("))
 
