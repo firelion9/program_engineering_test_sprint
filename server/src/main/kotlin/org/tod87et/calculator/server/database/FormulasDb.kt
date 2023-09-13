@@ -4,7 +4,9 @@ import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.SortOrder
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.Table
+import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.javatime.datetime
 import org.jetbrains.exposed.sql.selectAll
@@ -28,23 +30,52 @@ class FormulasDb(url: String, driver: String, user: String, password: String) {
             Formulas.insert {
                 it[Formulas.formula] = formula
                 it[Formulas.result] = result
-                it[date] = LocalDateTime.now()
+                it[Formulas.date] = LocalDateTime.now()
             }
         }
     }
 
     /**
-     * Returns the last [limit] formulas
+     * Returns: true if the formula has been deleted, false if the formula is not found
      */
-    fun selectFormulas(limit: Int): List<FormulaEntry> = transaction(database) {
-        Formulas.selectAll().orderBy(Formulas.date, SortOrder.DESC).limit(limit).map {
-            FormulaEntry(
-                id = it[Formulas.id],
-                formula = it[Formulas.formula],
-                result = it[Formulas.result],
-                date = it[Formulas.date]
-            )
-        }.reversed()
+    fun deleteFormula(id: Int): Boolean {
+        val rowsUpdated = transaction(database) {
+            Formulas.deleteWhere { Formulas.id eq id }
+        }
+
+        return rowsUpdated > 0
+    }
+
+    /**
+     * Returns: all formulas in ascending order by time
+     */
+    fun selectAllFormulas() = transaction(database) {
+        Formulas.selectAll()
+            .orderBy(Formulas.date, SortOrder.ASC)
+            .map {
+                FormulaEntry(
+                    id = it[Formulas.id],
+                    formula = it[Formulas.formula],
+                    result = it[Formulas.result],
+                    date = it[Formulas.date]
+                )
+            }
+    }
+
+    /**
+     * Returns: the last [limit] formulas with an [offset] in ascending order by time
+     */
+    fun selectFormulas(limit: Int, offset: Long = 0): List<FormulaEntry> = transaction(database) {
+        Formulas.selectAll()
+            .orderBy(Formulas.date, SortOrder.DESC)
+            .limit(limit, offset).map {
+                FormulaEntry(
+                    id = it[Formulas.id],
+                    formula = it[Formulas.formula],
+                    result = it[Formulas.result],
+                    date = it[Formulas.date]
+                )
+            }.reversed()
     }
 
     private object Formulas : Table() {
