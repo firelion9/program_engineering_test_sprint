@@ -4,7 +4,7 @@ plugins {
     application
 }
 
-group = "org.tod87et"
+group = "org.tod87et.calculator"
 
 val exposedVersion: String by project
 
