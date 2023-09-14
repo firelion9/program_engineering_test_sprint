@@ -15,6 +15,7 @@ val kotlinxDatetimeVersion = extra["kotlinx-datetime.version"] as String
 dependencies {
     testImplementation(platform("org.junit:junit-bom:5.9.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("io.zonky.test:embedded-postgres:2.0.4")
 
     implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
