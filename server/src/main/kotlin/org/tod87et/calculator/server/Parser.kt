@@ -14,34 +14,30 @@ class Parser private constructor(formula: String) {
         }
 
         // Split by first number, sign or bracket
-        fun lex(s: String): Pair<String, String> {
+        fun tokenize(s: String): List<String> {
+            val tokens = mutableListOf<String>()
+
             var word = ""
             var wordContainsPoint = false
 
             for (c in s.withIndex()) {
+
                 val isSignOrBracket = isSign(c.value.toString()) || c.value == '(' || c.value == ')'
-                if (isSignOrBracket) {
-                    return if (word.isEmpty())
-                        Pair(
-                            s.slice(c.index .. c.index),
-                            s.slice(c.index+1 until s.length)
-                        )
-                    else
-                        Pair(
-                            word,
-                            s.slice(c.index until s.length)
-                        )
-                }
-                if (c.value.isWhitespace()) {
-                    if (word.isEmpty()) continue
-                    else return Pair(
-                        word,
-                        s.slice(c.index until s.length)
-                    )
+                if (isSignOrBracket || c.value.isWhitespace()) {
+                    if (word.isNotEmpty()) {
+                        tokens.add(word)
+
+                        word = ""
+                    }
+                    wordContainsPoint = false
+
+                    if (!c.value.isWhitespace())
+                        tokens.add(c.value.toString())
+
+                    continue
                 }
 
                 val isPoint = c.value == '.'
-
                 if (isPoint) {
                     if (wordContainsPoint)
                         throw BadNumber("Double point in number")
@@ -49,19 +45,24 @@ class Parser private constructor(formula: String) {
                     word += '.'
 
                     wordContainsPoint = true
+
+                    continue
                 }
 
                 val isDigit = c.value.isDigit()
-
                 if (isDigit) {
                     word += c.value
+
+                    continue
                 }
 
-                if (!isDigit && !isSignOrBracket && !isPoint)
-                    throw UnsupportedSymbolException("Unsupported character")
+                throw UnsupportedSymbolException("Unsupported character")
 
             }
-            return Pair(word, "")
+            if (word.isNotEmpty())
+                tokens.add(word)
+
+            return tokens
         }
 
         enum class Binop {
@@ -80,10 +81,9 @@ class Parser private constructor(formula: String) {
 
             var previousNumber = 0.0
 
-            var currentFormula = formula
+            val tokens = tokenize(formula)
 
-            do {
-                val (word, otherFormula) = lex(currentFormula)
+            for (word in tokens) {
                 if (word == "(") {
                     bracketCounter++
                     levelQueue.add(operationQueue)
@@ -105,9 +105,8 @@ class Parser private constructor(formula: String) {
                     previousNumber = numberOrNull ?: throw ParserException(word)
                 }
 
-                currentFormula = otherFormula.trimStart(' ')
 
-            } while (currentFormula.isNotEmpty())
+            }
 
             previousNumber = foldOperationQueue(operationQueue, previousNumber)
 
