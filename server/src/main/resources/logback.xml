@@ -17,4 +17,7 @@
     </root>
     <logger name="org.eclipse.jetty" level="INFO"/>
     <logger name="io.netty" level="INFO"/>
+    <logger name="io.zonky.test.db.postgres.embedded.EmbeddedPostgres" level="ERROR"/>
+    <logger name="io.zonky.test.db.postgres.embedded.DefaultPostgresBinaryResolver" level="ERROR"/>
+    <logger name="Exposed" level="ERROR"/>
 </configuration>
