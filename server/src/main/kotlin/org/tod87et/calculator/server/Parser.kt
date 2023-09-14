@@ -1,57 +1,112 @@
 package org.tod87et.calculator.server
 
-class Parser private constructor(formula: String) {
+import java.lang.StringBuilder
 
-    class EvalException(message: String): Exception(message)
-    open class ParserException(message: String): Exception(message)
-    class UnsupportedSymbolException(message: String): ParserException(message)
-    class BadNumber(message: String): ParserException(message)
+class EvalException(message: String): Exception(message)
+open class ParserException(message: String): Exception(message)
+class UnsupportedSymbolException(message: String): ParserException(message)
+class BadNumber(message: String): ParserException(message)
+class IncorrectBracketSequence(message: String): ParserException(message)
+
+private fun isSign (c: String) : Boolean {
+    return listOf("+", "-", "*", "/", "^").contains(c)
+}
+
+abstract class Token() {
+    abstract val type: TokenType
+}
+
+enum class SignType {
+    PLUS, MINUS, MULTIPLY, DIVIDE, POWER
+}
+
+enum class TokenType {
+    NUMBER, SIGN, LEFT_BRACKET, RIGHT_BRACKET
+}
+
+public class TokenNumber(val number: Double): Token() {
+    override val type = TokenType.NUMBER
+
+    override fun toString() = "(${number.toString()})"
+}
+
+class TokenSign(val signType: SignType): Token() {
+    override val type = TokenType.SIGN
+
+    override fun toString() = "[${type.toString()}]"
+}
+
+class TokenLeftBracket(): Token() {
+    override val type = TokenType.LEFT_BRACKET
+    override fun toString() = "[(]"
+}
+
+class TokenRightBracket(): Token() {
+    override val type = TokenType.RIGHT_BRACKET
+    override fun toString() = "[)]"
+}
+
+fun toToken(c: Char): Token {
+    return when (c) {
+        '+' -> TokenSign(SignType.PLUS)
+        '-' -> TokenSign(SignType.MINUS)
+        '*' -> TokenSign(SignType.MULTIPLY)
+        '/' -> TokenSign(SignType.DIVIDE)
+        '^' -> TokenSign(SignType.POWER)
+        '(' -> TokenLeftBracket()
+        ')' -> TokenRightBracket()
+        else -> throw UnsupportedSymbolException(c.toString())
+    }
+}
+
+fun toTokenNumber(word: String): TokenNumber {
+    return TokenNumber(word.toDoubleOrNull() ?: throw UnsupportedSymbolException(word))
+}
+
+
+class Parser private constructor(formula: String) {
 
     companion object {
 
-        private fun isSign (c: String) : Boolean {
-            return listOf("+", "-", "*", "/", "^").contains(c)
-        }
-
         // Split by first number, sign or bracket
-        fun tokenize(s: String): List<String> {
-            val tokens = mutableListOf<String>()
+        fun tokenize(s: String): List<Token> {
+            val tokens = mutableListOf<Token>()
 
-            var word = ""
+            val word = StringBuilder()
             var wordContainsPoint = false
 
-            for (c in s.withIndex()) {
+            for (c in s) {
 
-                val isSignOrBracket = isSign(c.value.toString()) || c.value == '(' || c.value == ')'
-                if (isSignOrBracket || c.value.isWhitespace()) {
+                val isSignOrBracket = isSign(c.toString()) || c == '(' || c == ')'
+                if (isSignOrBracket || c.isWhitespace()) {
                     if (word.isNotEmpty()) {
-                        tokens.add(word)
+                        tokens.add(toTokenNumber(word.toString()))
 
-                        word = ""
+                        word.clear()
                     }
                     wordContainsPoint = false
 
-                    if (!c.value.isWhitespace())
-                        tokens.add(c.value.toString())
+                    if (!c.isWhitespace())
+                        tokens.add(toToken(c))
 
                     continue
                 }
 
-                val isPoint = c.value == '.'
+                val isPoint = c == '.'
                 if (isPoint) {
                     if (wordContainsPoint)
                         throw BadNumber("Double point in number")
 
-                    word += '.'
+                    word.append(".")
 
                     wordContainsPoint = true
 
                     continue
                 }
 
-                val isDigit = c.value.isDigit()
+                val isDigit = c.isDigit()
                 if (isDigit) {
-                    word += c.value
+                    word.append(c.toString())
 
                     continue
                 }
@@ -60,57 +115,46 @@ class Parser private constructor(formula: String) {
 
             }
             if (word.isNotEmpty())
-                tokens.add(word)
+                tokens.add(toTokenNumber(word.toString()))
 
             return tokens
         }
 
-        enum class Binop {
-            PLUS, MINUS, MULTIPLY, DIVIDE, POWER
-        }
-
-        private fun foldOperationQueue(operationQueue: MutableList<Pair<Double, Binop>>, lastElement: Double): Double {
+        private fun foldOperationQueue(operationQueue: List<Token>): Double {
             TODO()
         }
 
         fun eval(formula: String): Double {
             var bracketCounter = 0
 
-            var operationQueue = mutableListOf<Pair<Double, Binop>>()
-            val levelQueue = mutableListOf<MutableList<Pair<Double, Binop>>>()
-
-            var previousNumber = 0.0
+            var operationQueue = mutableListOf<Token>()
+            val levelQueue = mutableListOf<MutableList<Token>>()
 
             val tokens = tokenize(formula)
 
-            for (word in tokens) {
-                if (word == "(") {
-                    bracketCounter++
-                    levelQueue.add(operationQueue)
-                    operationQueue = mutableListOf()
-                } else if (word == ")") {
-                    bracketCounter--
-                    previousNumber = foldOperationQueue(operationQueue, previousNumber)
-                } else if (isSign(word)) {
-                    when (word) {
-                        "+" -> operationQueue.add(Pair(previousNumber, Binop.PLUS))
-                        "-" -> operationQueue . add (Pair(previousNumber, Binop.MINUS))
-                        "*" -> operationQueue.add(Pair(previousNumber, Binop.MULTIPLY))
-                        "/" -> operationQueue.add(Pair(previousNumber, Binop.DIVIDE))
-                        "^" -> operationQueue.add(Pair(previousNumber, Binop.POWER))
+            for (token in tokens) {
+                when (token.type) {
+                    TokenType.LEFT_BRACKET -> {
+                        bracketCounter++
+                        levelQueue.add(operationQueue)
+                        operationQueue = mutableListOf()
+                    }
+                    TokenType.RIGHT_BRACKET -> {
+                        bracketCounter--
+                        if (bracketCounter < 0)
+                            throw IncorrectBracketSequence("")
+                        operationQueue.add(TokenNumber(foldOperationQueue(operationQueue)))
+                    }
+                    TokenType.SIGN -> {
+                        operationQueue.add(token)
+                    }
+                    TokenType.NUMBER -> {
+                        operationQueue.add(token)
                     }
                 }
-                else {
-                    val numberOrNull = word.toDoubleOrNull()
-                    previousNumber = numberOrNull ?: throw ParserException(word)
-                }
-
-
             }
 
-            previousNumber = foldOperationQueue(operationQueue, previousNumber)
-
-            return previousNumber
+            return foldOperationQueue(operationQueue)
         }
     }
 }
