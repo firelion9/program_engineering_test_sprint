@@ -6,22 +6,30 @@ import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.Table
+import org.jetbrains.exposed.sql.deleteAll
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.javatime.datetime
+import org.jetbrains.exposed.sql.javatime.timestamp
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
-import java.time.LocalDateTime
+import java.time.Instant
+import javax.sql.DataSource
 
-class FormulasDb(url: String, driver: String, user: String, password: String) {
-    private val database = Database.connect(
-        url = url,
-        driver = driver,
-        user = user,
-        password = password,
-    )
+class FormulasDb {
+    private val database: Database
 
-    init {
+    constructor(url: String, driver: String, user: String, password: String) {
+        database = Database.connect(
+            url = url,
+            driver = driver,
+            user = user,
+            password = password,
+        )
+        transaction(database) { SchemaUtils.create(Formulas) }
+    }
+
+    constructor(datasource: DataSource) {
+        database = Database.connect(datasource)
         transaction(database) { SchemaUtils.create(Formulas) }
     }
 
@@ -30,7 +38,7 @@ class FormulasDb(url: String, driver: String, user: String, password: String) {
             Formulas.insert {
                 it[Formulas.formula] = formula
                 it[Formulas.result] = result
-                it[Formulas.date] = LocalDateTime.now()
+                it[Formulas.date] = Instant.now()
             }
         }
     }
@@ -78,11 +86,15 @@ class FormulasDb(url: String, driver: String, user: String, password: String) {
             }.reversed()
     }
 
-    private object Formulas : Table() {
+    fun clear(): Unit = transaction(database) {
+        Formulas.deleteAll()
+    }
+
+    object Formulas : Table() {
         val id: Column<Int> = integer("id").autoIncrement()
         val formula: Column<String> = text("formula")
         val result: Column<Double> = double("result")
-        val date: Column<LocalDateTime> = datetime("date")
+        val date: Column<Instant> = timestamp("date")
 
         override val primaryKey = PrimaryKey(id)
     }
