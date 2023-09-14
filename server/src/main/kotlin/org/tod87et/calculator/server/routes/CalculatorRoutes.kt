@@ -6,7 +6,10 @@ fun Route.calculatorRouting() {
     route("/calculator") {
         route("/compute") {
             post {
-                //TODO
+                /* TODO
+                 * Как я понимаю, парсинг и подсчет будет происходить с помощью
+                 * Parser.eval(expression)
+                 */
             }
         }
     }
