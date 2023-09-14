@@ -24,7 +24,7 @@ enum class TokenType {
     NUMBER, SIGN, LEFT_BRACKET, RIGHT_BRACKET
 }
 
-public class TokenNumber(val number: Double): Token() {
+class TokenNumber(val number: Double): Token() {
     override val type = TokenType.NUMBER
 
     override fun toString() = "(${number.toString()})"
@@ -78,41 +78,34 @@ class Parser private constructor(formula: String) {
             for (c in s) {
 
                 val isSignOrBracket = isSign(c.toString()) || c == '(' || c == ')'
-                if (isSignOrBracket || c.isWhitespace()) {
-                    if (word.isNotEmpty()) {
-                        tokens.add(toTokenNumber(word.toString()))
-
-                        word.clear()
-                    }
-                    wordContainsPoint = false
-
-                    if (!c.isWhitespace())
-                        tokens.add(toToken(c))
-
-                    continue
-                }
-
                 val isPoint = c == '.'
-                if (isPoint) {
-                    if (wordContainsPoint)
-                        throw BadNumber("Double point in number")
-
-                    word.append(".")
-
-                    wordContainsPoint = true
-
-                    continue
-                }
-
                 val isDigit = c.isDigit()
-                if (isDigit) {
-                    word.append(c.toString())
 
-                    continue
+                when {
+                    isSignOrBracket || c.isWhitespace() -> {
+                        if (word.isNotEmpty()) {
+                            tokens.add(toTokenNumber(word.toString()))
+
+                            word.clear()
+                        }
+                        wordContainsPoint = false
+
+                        if (!c.isWhitespace())
+                            tokens.add(toToken(c))
+                    }
+                    isPoint -> {
+                        if (wordContainsPoint)
+                            throw BadNumber("Double point in number")
+
+                        word.append(".")
+
+                        wordContainsPoint = true
+                    }
+                    isDigit ->
+                        word.append(c.toString())
+                    else ->
+                        throw UnsupportedSymbolException("Unsupported character")
                 }
-
-                throw UnsupportedSymbolException("Unsupported character")
-
             }
             if (word.isNotEmpty())
                 tokens.add(toTokenNumber(word.toString()))
