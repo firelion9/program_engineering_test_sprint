@@ -8,8 +8,8 @@ class UnsupportedSymbolException(message: String): ParserException(message)
 class BadNumber(message: String): ParserException(message)
 class IncorrectBracketSequence(message: String): ParserException(message)
 
-private fun isSign (c: String) : Boolean {
-    return listOf("+", "-", "*", "/", "^").contains(c)
+private fun isSignOrBracket(c: Char): Boolean {
+    return c in listOf('+', '-', '*', '/', '^', ')', '(')
 }
 
 interface Token
@@ -65,7 +65,7 @@ class Parser private constructor(formula: String) {
 
             for (c in s) {
 
-                val isSignOrBracket = isSign(c.toString()) || c == '(' || c == ')'
+                val isSignOrBracket = isSignOrBracket(c)
                 val isPoint = c == '.'
                 val isDigit = c.isDigit()
 
@@ -89,10 +89,8 @@ class Parser private constructor(formula: String) {
 
                         wordContainsPoint = true
                     }
-                    isDigit ->
-                        word.append(c.toString())
-                    else ->
-                        throw UnsupportedSymbolException("Unsupported character")
+                    isDigit -> word.append(c.toString())
+                    else -> throw UnsupportedSymbolException("Unsupported character")
                 }
             }
             if (word.isNotEmpty())
@@ -130,13 +128,9 @@ class Parser private constructor(formula: String) {
                         operationQueue.add(foldResult)
                     }
 
-                    is TokenSign -> {
-                        operationQueue.add(token)
-                    }
+                    is TokenSign -> operationQueue.add(token)
 
-                    is TokenNumber -> {
-                        operationQueue.add(token)
-                    }
+                    is TokenNumber -> operationQueue.add(token)
                 }
             }
 
