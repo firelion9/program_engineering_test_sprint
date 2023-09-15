@@ -15,7 +15,7 @@ private fun isSign (c: String) : Boolean {
 abstract class Token() {}
 
 enum class SignType {
-    PLUS, MINUS, MULTIPLY, DIVIDE, POWER
+    PLUS, MINUS, MULTIPLICATION, DIVISION, POWER
 }
 
 class TokenNumber(val number: Double): Token() {
@@ -38,8 +38,8 @@ fun toToken(c: Char): Token {
     return when (c) {
         '+' -> TokenSign(SignType.PLUS)
         '-' -> TokenSign(SignType.MINUS)
-        '*' -> TokenSign(SignType.MULTIPLY)
-        '/' -> TokenSign(SignType.DIVIDE)
+        '*' -> TokenSign(SignType.MULTIPLICATION)
+        '/' -> TokenSign(SignType.DIVISION)
         '^' -> TokenSign(SignType.POWER)
         '(' -> TokenLeftBracket()
         ')' -> TokenRightBracket()

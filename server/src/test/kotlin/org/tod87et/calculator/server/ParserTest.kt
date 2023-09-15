@@ -25,7 +25,7 @@ class ParserTest {
 
         assertToStringEquals(listOf(TokenSign(SignType.MINUS), TokenNumber(42.0), TokenLeftBracket()), Parser.tokenize("   -42 ("))
 
-        assertToStringEquals(listOf(TokenSign(SignType.MULTIPLY), TokenNumber(98.0), TokenSign(SignType.DIVIDE), TokenNumber(9.0)), Parser.tokenize("*98 / 9"))
+        assertToStringEquals(listOf(TokenSign(SignType.MULTIPLICATION), TokenNumber(98.0), TokenSign(SignType.DIVISION), TokenNumber(9.0)), Parser.tokenize("*98 / 9"))
 
         assertToStringEquals(listOf(TokenSign(SignType.PLUS), TokenNumber(98.0), TokenSign(SignType.POWER), TokenNumber(9.0)), Parser.tokenize("+     98 ^ 9"))
     }
