@@ -7,7 +7,7 @@ import org.junit.jupiter.api.assertThrows
 
 class ParserTest {
 
-    fun assertToStringEquals(a: Any, b: Any) {
+    private fun assertToStringEquals(a: Any, b: Any) {
         assertEquals(a.toString(), b.toString())
     }
     @Test
@@ -37,6 +37,13 @@ class ParserTest {
         assertEquals(Parser.eval("5+7"), 12.0)
         assertEquals(Parser.eval("2+2*2"), 6.0)
         assertEquals(Parser.eval("5*(3+7)"), 50.0)
-        assertEquals(Parser.eval("(6+2*7)-((3^2-1*2)+(7-2^2*3))"), 18)
+        assertEquals(Parser.eval("(3+7)*5"), 50.0)
+        assertEquals(Parser.eval("2^2^2"), 16.0)
+        assertEquals(Parser.eval("-404"), -404.0) // unary minus
+        assertEquals(Parser.eval("(-404 + 200)"), -204.0)
+        assertEquals(Parser.eval("(3 * -2)"), -6.0)
+        assertEquals(Parser.eval("2^2^3"), 256.0) // power is right-associative
+        assertEquals(Parser.eval("2^(1+2)^3"), 134217728.0)
+        assertEquals(Parser.eval("(6+2*7)-((3^2-1*2)+(7-2^2*3))"), 18.0)
     }
 }
