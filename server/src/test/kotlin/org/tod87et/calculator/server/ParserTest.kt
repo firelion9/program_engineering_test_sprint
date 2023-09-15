@@ -1,7 +1,7 @@
 package org.tod87et.calculator.server
 
-import org.junit.Ignore
 import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 class ParserTest {
@@ -30,7 +30,7 @@ class ParserTest {
         assertToStringEquals(listOf(TokenSign(SignType.PLUS), TokenNumber(98.0), TokenSign(SignType.POWER), TokenNumber(9.0)), Parser.tokenize("+     98 ^ 9"))
     }
 
-    @Ignore
+    @Disabled
     @Test
     fun testEval() {
         assertEquals(Parser.eval("42"), 42.0)
