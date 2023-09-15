@@ -1,6 +1,8 @@
 package org.tod87et.calculator.server
 
+import org.tod87et.calculator.server.Stack
 import java.lang.StringBuilder
+import kotlin.math.pow
 
 class EvalException(message: String): Exception(message)
 open class ParserException(message: String): Exception(message)
@@ -8,29 +10,59 @@ class UnsupportedSymbolException(message: String): ParserException(message)
 class BadNumber(message: String): ParserException(message)
 class IncorrectBracketSequence(message: String): ParserException(message)
 
+fun <T> MutableList<T>.push(item: T) = this.add ( this.count(), item )
+fun <T> MutableList<T>.pop(): T? = if (this.isNotEmpty()) this.removeAt(this.count() - 1) else null
+fun <T> MutableList<T>.peek(): T? = if (this.isNotEmpty()) this[this.count() - 1] else null
+
+typealias Stack<T> = MutableList<T>
+
 private fun isSignOrBracket(c: Char): Boolean {
     return c in listOf('+', '-', '*', '/', '^', ')', '(')
 }
 
 interface Token
 
+interface TokenOperation: Token
+
 enum class SignType {
     PLUS, MINUS, MULTIPLICATION, DIVISION, POWER
+}
+
+fun SignType.getPriority(): Int {
+    return when (this) {
+        SignType.PLUS -> 1
+        SignType.MINUS -> 1
+        SignType.MULTIPLICATION -> 2
+        SignType.DIVISION -> 2
+        SignType.POWER -> 3
+        else -> throw ParserException("")
+    }
+}
+
+fun SignType.getDelegate(): (Double, Double) -> Double {
+    return when (this) {
+        SignType.PLUS -> { b, a -> a + b }
+        SignType.MINUS -> { b, a -> a - b }
+        SignType.MULTIPLICATION -> { b, a -> a * b }
+        SignType.DIVISION -> { b, a -> a / b }
+        SignType.POWER -> { b, a -> a.pow(b) }
+        else -> throw ParserException("")
+    }
 }
 
 class TokenNumber(val number: Double): Token {
     override fun toString() = "($number)"
 }
 
-class TokenSign(val signType: SignType): Token {
+class TokenSign(val signType: SignType): TokenOperation {
     override fun toString() = "[$signType]"
 }
 
-class TokenLeftBracket: Token {
+class TokenLeftBracket: TokenOperation {
     override fun toString() = "[(]"
 }
 
-class TokenRightBracket: Token {
+class TokenRightBracket: TokenOperation {
     override fun toString() = "[)]"
 }
 
@@ -98,43 +130,79 @@ class Parser private constructor(formula: String) {
 
             return tokens
         }
+/*
 
         private fun foldOperationQueue(operationQueue: List<Token>): Double {
-            TODO()
+
+            var rightOperand = mutableListOf<Token>()
+            var leftOperand =  mutableListOf<Token>()
+
+            var highestPrecedence = 0
+            var currentOperation: SignType
+
+            for (token in operationQueue)
+            {
+                if (token is TokenNumber)
+                {
+                    if (highestPrecedence == 0) leftOperand.add(token)
+                    else rightOperand.add(token)
+                }
+            }
         }
+*/
 
         fun eval(formula: String): Double {
-            var bracketCounter = 0
 
-            var operationQueue = mutableListOf<Token>()
-            val levelQueue = mutableListOf<MutableList<Token>>()
+            val operationStack: Stack<TokenOperation> = mutableListOf()
+            val valueStack : Stack<TokenNumber> = mutableListOf()
 
             val tokens = tokenize(formula)
 
             for (token in tokens) {
                 when (token) {
                     is TokenLeftBracket -> {
-                        bracketCounter++
-                        levelQueue.add(operationQueue)
-                        operationQueue = mutableListOf()
+                        operationStack.push(token)
                     }
 
                     is TokenRightBracket -> {
-                        bracketCounter--
-                        if (bracketCounter < 0)
-                            throw IncorrectBracketSequence("")
-                        val foldResult = TokenNumber(foldOperationQueue(operationQueue))
-                        operationQueue = levelQueue.dropLast(1).last()
-                        operationQueue.add(foldResult)
+                        while (operationStack.peek() !is TokenLeftBracket){
+                            if (operationStack.peek() == null) throw IncorrectBracketSequence("")
+                            if (valueStack.count() < 2) throw EvalException("")
+                            valueStack.push(TokenNumber((operationStack.pop() as TokenSign).signType.getDelegate()
+                                (valueStack.pop()!!.number, valueStack.pop()!!.number)))
+                        }
+                        operationStack.pop()
                     }
 
-                    is TokenSign -> operationQueue.add(token)
+                    is TokenSign -> {
+                        while (operationStack.isNotEmpty()) {
+                            val next = operationStack.peek()
+                            if (next is TokenLeftBracket) break
+                            if ((next as TokenSign).signType.getPriority() < token.signType.getPriority()) break
+                            operationStack.pop()
+                            if (valueStack.count() < 2) throw EvalException("")
+                            valueStack.push(TokenNumber((next as TokenSign).signType.getDelegate()
+                                (valueStack.pop()!!.number, valueStack.pop()!!.number)))
+                        }
 
-                    is TokenNumber -> operationQueue.add(token)
+                        operationStack.push(token)
+                    }
+
+                    is TokenNumber -> valueStack.push(token)
                 }
             }
 
-            return foldOperationQueue(operationQueue)
+            while (operationStack.isNotEmpty()) {
+                val next = operationStack.pop()
+                if (next is TokenLeftBracket) throw IncorrectBracketSequence("")
+                if (valueStack.count() < 2) throw EvalException("")
+                valueStack.push(TokenNumber((next as TokenSign).signType.getDelegate()
+                    (valueStack.pop()!!.number, valueStack.pop()!!.number)))
+            }
+
+            if (valueStack.count() != 1) throw EvalException("")
+
+            return valueStack[0].number
         }
     }
 }

@@ -3,6 +3,7 @@ package org.tod87et.calculator.server
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 class ParserTest {
 
@@ -30,9 +31,12 @@ class ParserTest {
         assertToStringEquals(listOf(TokenSign(SignType.PLUS), TokenNumber(98.0), TokenSign(SignType.POWER), TokenNumber(9.0)), Parser.tokenize("+     98 ^ 9"))
     }
 
-    @Disabled
     @Test
     fun testEval() {
         assertEquals(Parser.eval("42"), 42.0)
+        assertEquals(Parser.eval("5+7"), 12.0)
+        assertEquals(Parser.eval("2+2*2"), 6.0)
+        assertEquals(Parser.eval("5*(3+7)"), 50.0)
+        assertEquals(Parser.eval("(6+2*7)-((3^2-1*2)+(7-2^2*3))"), 18)
     }
 }
