@@ -12,25 +12,25 @@ private fun isSign (c: String) : Boolean {
     return listOf("+", "-", "*", "/", "^").contains(c)
 }
 
-abstract class Token() {}
+interface Token
 
 enum class SignType {
     PLUS, MINUS, MULTIPLICATION, DIVISION, POWER
 }
 
-class TokenNumber(val number: Double): Token() {
+class TokenNumber(val number: Double): Token {
     override fun toString() = "($number)"
 }
 
-class TokenSign(val signType: SignType): Token() {
+class TokenSign(val signType: SignType): Token {
     override fun toString() = "[$signType]"
 }
 
-class TokenLeftBracket(): Token() {
+class TokenLeftBracket: Token {
     override fun toString() = "[(]"
 }
 
-class TokenRightBracket(): Token() {
+class TokenRightBracket: Token {
     override fun toString() = "[)]"
 }
 
@@ -125,7 +125,9 @@ class Parser private constructor(formula: String) {
                         bracketCounter--
                         if (bracketCounter < 0)
                             throw IncorrectBracketSequence("")
-                        operationQueue.add(TokenNumber(foldOperationQueue(operationQueue)))
+                        val foldResult = TokenNumber(foldOperationQueue(operationQueue))
+                        operationQueue = levelQueue.dropLast(1).last()
+                        operationQueue.add(foldResult)
                     }
 
                     is TokenSign -> {
