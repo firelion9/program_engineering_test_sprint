@@ -12,37 +12,25 @@ private fun isSign (c: String) : Boolean {
     return listOf("+", "-", "*", "/", "^").contains(c)
 }
 
-abstract class Token() {
-    abstract val type: TokenType
-}
+abstract class Token() {}
 
 enum class SignType {
     PLUS, MINUS, MULTIPLY, DIVIDE, POWER
 }
 
-enum class TokenType {
-    NUMBER, SIGN, LEFT_BRACKET, RIGHT_BRACKET
-}
-
 class TokenNumber(val number: Double): Token() {
-    override val type = TokenType.NUMBER
-
-    override fun toString() = "(${number.toString()})"
+    override fun toString() = "($number)"
 }
 
 class TokenSign(val signType: SignType): Token() {
-    override val type = TokenType.SIGN
-
-    override fun toString() = "[${type.toString()}]"
+    override fun toString() = "[$signType]"
 }
 
 class TokenLeftBracket(): Token() {
-    override val type = TokenType.LEFT_BRACKET
     override fun toString() = "[(]"
 }
 
 class TokenRightBracket(): Token() {
-    override val type = TokenType.RIGHT_BRACKET
     override fun toString() = "[)]"
 }
 
@@ -126,22 +114,25 @@ class Parser private constructor(formula: String) {
             val tokens = tokenize(formula)
 
             for (token in tokens) {
-                when (token.type) {
-                    TokenType.LEFT_BRACKET -> {
+                when (token) {
+                    is TokenLeftBracket -> {
                         bracketCounter++
                         levelQueue.add(operationQueue)
                         operationQueue = mutableListOf()
                     }
-                    TokenType.RIGHT_BRACKET -> {
+
+                    is TokenRightBracket -> {
                         bracketCounter--
                         if (bracketCounter < 0)
                             throw IncorrectBracketSequence("")
                         operationQueue.add(TokenNumber(foldOperationQueue(operationQueue)))
                     }
-                    TokenType.SIGN -> {
+
+                    is TokenSign -> {
                         operationQueue.add(token)
                     }
-                    TokenType.NUMBER -> {
+
+                    is TokenNumber -> {
                         operationQueue.add(token)
                     }
                 }
