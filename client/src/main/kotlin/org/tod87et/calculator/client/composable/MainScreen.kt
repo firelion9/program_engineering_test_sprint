@@ -49,7 +49,7 @@ fun MainScreen(
                 Spacer(modifier = modifier.size(3.dp))
                 Text(
                     text = when (res) {
-                        is ApiResult.Success -> res.result
+                        is ApiResult.Success -> res.result.result.toString()
                         is ApiResult.Failure -> "ERROR: ${res.reason}"
                     },
                 )

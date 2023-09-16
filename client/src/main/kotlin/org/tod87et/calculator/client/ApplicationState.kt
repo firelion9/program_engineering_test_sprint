@@ -57,7 +57,7 @@ sealed interface ApplicationState {
         private val submittedExpressionState: MutableState<String?> = mutableStateOf(null)
         var submittedExpression by submittedExpressionState
 
-        private val lastResultState: MutableState<ApiResult<String>?> = mutableStateOf(null)
+        private val lastResultState: MutableState<ApiResult<ComputationResult>?> = mutableStateOf(null)
         var lastResult by lastResultState
 
         val isWaitingForResponse: Boolean by derivedStateOf {
@@ -72,7 +72,7 @@ sealed interface ApplicationState {
             lastResult = null
 
             coroutineScope.launch {
-                lastResult = appApi.calculatorApi.calculate(expression)
+                lastResult = appApi.calculatorApi.compute(expression)
                 submittedExpression = null
             }
         }
