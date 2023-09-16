@@ -21,12 +21,9 @@ enum class SignType {
     PLUS, MINUS, MULTIPLICATION, DIVISION, POWER
 }
 
+data class TokenNumber(val number: Double): Token
 
-class TokenNumber(val number: Double): Token {
-    override fun toString() = "($number)"
-}
-
-class TokenSign(val signType: SignType): Token {
+data class TokenSign(val signType: SignType): Token {
 
     val priority = when (this.signType) {
         SignType.PLUS -> 1
@@ -35,8 +32,6 @@ class TokenSign(val signType: SignType): Token {
         SignType.DIVISION -> 2
         SignType.POWER -> 3
     }
-
-    override fun toString() = "[$signType]"
 
     fun calculate(b: Double, a: Double): Double {
         return when (this.signType) {
@@ -51,10 +46,13 @@ class TokenSign(val signType: SignType): Token {
 
 class TokenLeftBracket: Token {
     override fun toString() = "[(]"
+    override fun equals(other: Any?): Boolean = other is TokenLeftBracket
+    override fun hashCode(): Int = javaClass.hashCode()
 }
 
 class TokenRightBracket: Token {
-    override fun toString() = "[)]"
+    override fun equals(other: Any?): Boolean = other is TokenRightBracket
+    override fun hashCode(): Int = javaClass.hashCode()
 }
 
 fun toToken(c: Char): Token =
