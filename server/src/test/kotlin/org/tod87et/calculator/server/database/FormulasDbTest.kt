@@ -62,6 +62,14 @@ class FormulasDbTest {
     }
 
     @Test
+    fun selectWithBigLimitTest() {
+        val actual = database.selectFormulas(1000, 1).parse()
+        val expected = formulas.dropLast(1)
+
+        assertEquals(expected, actual)
+    }
+
+    @Test
     fun deleteTest() {
         database.deleteFormula(database.selectFormulas(1).single().id)
 
