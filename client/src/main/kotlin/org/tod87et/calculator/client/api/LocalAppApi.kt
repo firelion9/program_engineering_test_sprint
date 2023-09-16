@@ -1,10 +1,13 @@
 package org.tod87et.calculator.client.api
 
+import kotlinx.coroutines.delay
+
 class LocalAppApi : AppApi {
     private val history = mutableListOf<ComputationResult>()
     private var lastId = 0L
     override val calculatorApi: CalculatorApi = object : CalculatorApi {
         override suspend fun compute(expression: String): ApiResult<ComputationResult> {
+            delay(1000)
             return if (expression.isBlank()) {
                 ApiResult.Failure("expression is blank")
             } else {

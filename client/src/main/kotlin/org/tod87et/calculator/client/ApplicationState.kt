@@ -13,7 +13,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.tod87et.calculator.client.api.ApiResult
 import org.tod87et.calculator.client.api.AppApi
+import org.tod87et.calculator.client.api.ComputationResult
 import org.tod87et.calculator.client.api.LocalAppApi
+import org.tod87et.calculator.client.api.NetworkAppApi
 
 sealed interface ApplicationState {
     val snackbarHostState: SnackbarHostState
@@ -26,33 +28,73 @@ sealed interface ApplicationState {
         private val hostStringState = mutableStateOf(initialHostString)
         var hostString by hostStringState
 
+        private val isConnectingState = mutableStateOf(false)
+        var isConnecting by isConnectingState
+
         fun flowToMainScreen(
             coroutineScope: CoroutineScope,
             updateAppState: (ApplicationState) -> Unit,
         ) {
             val host = hostString
 
-            val api = if (host == "local") {
+            coroutineScope.launch {
+                if (isConnecting) {
+                    return@launch
+                }
+                isConnecting = true
+                try {
+                    connectAndFlowToMainScreen(host, updateAppState, coroutineScope)
+
+                } finally {
+                    isConnecting = false
+                }
+            }
+        }
+
+        private suspend fun connectAndFlowToMainScreen(
+            host: String,
+            updateAppState: (ApplicationState) -> Unit,
+            coroutineScope: CoroutineScope,
+        ) {
+            var host1 = host
+            val api = if (host1 == "local") {
                 LocalAppApi()
             } else {
-                coroutineScope.launch {
-                    showSnackbar("Cannot create api")
+                if (!host1.startsWith("http")) {
+                    host1 = "http://$host1"
                 }
-                return
+                NetworkAppApi(host1, KTorFactory.createHttpClient())
             }
 
-            updateAppState(MainScreen(snackbarHostState, api))
+            when (val history = api.historyApi.listHistory(limit = 1)) {
+                is ApiResult.Success -> {
+                    updateAppState(MainScreen(snackbarHostState, host, api))
+                }
+
+                is ApiResult.Failure -> {
+                    coroutineScope.launch {
+                        showSnackbar(history.reason)
+                    }
+                }
+            }
         }
     }
 
     @Stable
     class MainScreen(
         override val snackbarHostState: SnackbarHostState,
+        val hostString: String,
         val appApi: AppApi,
         initialExpression: String = "",
     ) : ApplicationState {
         private val expressionState = mutableStateOf(initialExpression)
-        var expression by expressionState
+        var expression
+            get() = expressionState.value
+            set(value) {
+                expressionState.value = value.filter {
+                    it in expressionChars
+                }
+            }
 
         private val submittedExpressionState: MutableState<String?> = mutableStateOf(null)
         var submittedExpression by submittedExpressionState
@@ -76,6 +118,31 @@ sealed interface ApplicationState {
                 submittedExpression = null
             }
         }
+
+        fun onBackSpace(clear: Boolean = false) {
+            expression = if (clear) {
+                ""
+            } else {
+                expression.let {
+                    it.substring(0, it.lastIndex.coerceAtLeast(0))
+                }
+            }
+        }
+
+        fun flowToConnectionInitializationScreen(
+            updateAppState: (ApplicationState) -> Unit,
+            coroutineScope: CoroutineScope,
+        ) {
+            updateAppState(ConnectionInitializationScreen(snackbarHostState, hostString))
+        }
+    }
+
+    companion object {
+        private val expressionChars = setOf(
+            *('0'..'9').toList().toTypedArray(),
+            '+', '-', '*', '/', '^',
+            '(', ')', '.',
+        )
     }
 }
 
