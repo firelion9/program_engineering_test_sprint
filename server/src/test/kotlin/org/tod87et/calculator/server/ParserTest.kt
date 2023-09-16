@@ -1,9 +1,7 @@
 package org.tod87et.calculator.server
 
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 class ParserTest {
 
@@ -42,6 +40,7 @@ class ParserTest {
         assertEquals(Parser.eval("-404"), -404.0) // unary minus
         assertEquals(Parser.eval("(-404 + 200)"), -204.0)
         assertEquals(Parser.eval("(3 * -2)"), -6.0)
+        assertEquals(Parser.eval("(3 * -(7 + 3)"), -30.0)
         assertEquals(Parser.eval("2^2^3"), 256.0) // power is right-associative
         assertEquals(Parser.eval("2^(1+2)^3"), 134217728.0)
         assertEquals(Parser.eval("(6+2*7)-((3^2-1*2)+(7-2^2*3))"), 18.0)

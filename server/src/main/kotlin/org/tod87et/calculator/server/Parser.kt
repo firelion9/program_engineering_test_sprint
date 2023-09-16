@@ -1,6 +1,5 @@
 package org.tod87et.calculator.server
 
-import org.tod87et.calculator.server.Stack
 import java.lang.StringBuilder
 import kotlin.math.pow
 
@@ -18,8 +17,6 @@ private fun isSignOrBracket(c: Char): Boolean {
 
 interface Token
 
-interface TokenOperation: Token
-
 enum class SignType {
     PLUS, MINUS, MULTIPLICATION, DIVISION, POWER
 }
@@ -29,7 +26,7 @@ class TokenNumber(val number: Double): Token {
     override fun toString() = "($number)"
 }
 
-class TokenSign(val signType: SignType): TokenOperation {
+class TokenSign(val signType: SignType): Token {
 
     val priority = when (this.signType) {
         SignType.PLUS -> 1
@@ -52,16 +49,16 @@ class TokenSign(val signType: SignType): TokenOperation {
     }
 }
 
-class TokenLeftBracket: TokenOperation {
+class TokenLeftBracket: Token {
     override fun toString() = "[(]"
 }
 
-class TokenRightBracket: TokenOperation {
+class TokenRightBracket: Token {
     override fun toString() = "[)]"
 }
 
-fun toToken(c: Char): Token {
-    return when (c) {
+fun toToken(c: Char): Token =
+    when (c) {
         '+' -> TokenSign(SignType.PLUS)
         '-' -> TokenSign(SignType.MINUS)
         '*' -> TokenSign(SignType.MULTIPLICATION)
@@ -71,14 +68,13 @@ fun toToken(c: Char): Token {
         ')' -> TokenRightBracket()
         else -> throw UnsupportedSymbolException(c.toString())
     }
-}
 
 fun toTokenNumber(word: String): TokenNumber {
     return TokenNumber(word.toDoubleOrNull() ?: throw UnsupportedSymbolException(word))
 }
 
 
-class Parser private constructor(formula: String) {
+class Parser private constructor() {
 
     companion object {
 
@@ -130,27 +126,43 @@ class Parser private constructor(formula: String) {
 
 
             val operationStack: Stack<TokenSign> = mutableListOf()
-            val valueStack : Stack<TokenNumber> = mutableListOf()
+            val valueStack : Stack<Double> = mutableListOf()
+
+            var previousTokenIsNotNumber = true
+            var previousIsUnaryMinus = false
 
             for (token in tokens) {
                 when (token) {
                     is TokenSign -> {
+                        val isUnaryMinus = token.signType == SignType.MINUS && previousTokenIsNotNumber
+                        if (isUnaryMinus) {
+                            previousIsUnaryMinus = true
+                            continue
+                        }
+
                         while (operationStack.isNotEmpty()) {
                             val next = operationStack.last()
-                            if (next.priority < token.priority) break
+                            if (next.priority <= token.priority) break
                             operationStack.removeLast()
                             if (valueStack.count() < 2) throw EvalException("")
                             val calculationResult = next.calculate(
-                                valueStack.removeLast().number,
-                                valueStack.removeLast().number
+                                valueStack.removeLast(),
+                                valueStack.removeLast()
                             )
-                            valueStack.add(TokenNumber(calculationResult))
+                            valueStack.add(calculationResult)
                         }
 
                         operationStack.add(token)
+                        previousTokenIsNotNumber = true
+                        previousIsUnaryMinus = false
                     }
 
-                    is TokenNumber -> valueStack.add(token)
+                    is TokenNumber -> {
+                        val number = token.number * if (previousIsUnaryMinus) -1 else 1
+                        valueStack.add(number)
+
+                        previousTokenIsNotNumber = false
+                    }
 
                     else -> throw EvalException("")
                 }
@@ -160,15 +172,15 @@ class Parser private constructor(formula: String) {
                 val next = operationStack.removeLast()
                 if (valueStack.count() < 2) throw EvalException("")
                 val calculationResult = next.calculate(
-                    valueStack.removeLast().number,
-                    valueStack.removeLast().number
+                    valueStack.removeLast(),
+                    valueStack.removeLast()
                 )
-                valueStack.add(TokenNumber(calculationResult))
+                valueStack.add(calculationResult)
             }
 
             if (valueStack.count() != 1) throw EvalException("")
 
-            return valueStack[0].number
+            return valueStack.first()
         }
 
 
