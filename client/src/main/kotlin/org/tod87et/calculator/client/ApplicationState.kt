@@ -1,6 +1,5 @@
 package org.tod87et.calculator.client
 
-import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.SnackbarDuration
 import androidx.compose.material.SnackbarHostState

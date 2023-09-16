@@ -1,6 +1,5 @@
 package org.tod87et.calculator.client
 
-import androidx.compose.material.Colors
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
