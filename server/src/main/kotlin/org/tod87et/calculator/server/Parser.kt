@@ -30,25 +30,24 @@ class TokenNumber(val number: Double): Token {
 }
 
 class TokenSign(val signType: SignType): TokenOperation {
-    override fun toString() = "[$signType]"
 
-    fun getDelegate(): (Double, Double) -> Double {
-        return when (this.signType) {
-            SignType.PLUS -> { b, a -> a + b }
-            SignType.MINUS -> { b, a -> a - b }
-            SignType.MULTIPLICATION -> { b, a -> a * b }
-            SignType.DIVISION -> { b, a -> a / b }
-            SignType.POWER -> { b, a -> a.pow(b) }
-        }
+    val priority = when (this.signType) {
+        SignType.PLUS -> 1
+        SignType.MINUS -> 1
+        SignType.MULTIPLICATION -> 2
+        SignType.DIVISION -> 2
+        SignType.POWER -> 3
     }
 
-    fun getPriority(): Int {
+    override fun toString() = "[$signType]"
+
+    fun calculate(b: Double, a: Double): Double {
         return when (this.signType) {
-            SignType.PLUS -> 1
-            SignType.MINUS -> 1
-            SignType.MULTIPLICATION -> 2
-            SignType.DIVISION -> 2
-            SignType.POWER -> 3
+            SignType.PLUS -> a + b
+            SignType.MINUS -> a - b
+            SignType.MULTIPLICATION -> a * b
+            SignType.DIVISION -> a / b
+            SignType.POWER -> a.pow(b)
         }
     }
 }
@@ -125,79 +124,86 @@ class Parser private constructor(formula: String) {
 
             return tokens
         }
-/*
 
-        private fun foldOperationQueue(operationQueue: List<Token>): Double {
 
-            var rightOperand = mutableListOf<Token>()
-            var leftOperand =  mutableListOf<Token>()
+        private fun foldOperationQueue(tokens: List<Token>): Double {
 
-            var highestPrecedence = 0
-            var currentOperation: SignType
 
-            for (token in operationQueue)
-            {
-                if (token is TokenNumber)
-                {
-                    if (highestPrecedence == 0) leftOperand.add(token)
-                    else rightOperand.add(token)
-                }
-            }
-        }
-*/
-
-        fun eval(formula: String): Double {
-
-            val operationStack: Stack<TokenOperation> = mutableListOf()
+            val operationStack: Stack<TokenSign> = mutableListOf()
             val valueStack : Stack<TokenNumber> = mutableListOf()
-
-            val tokens = tokenize(formula)
 
             for (token in tokens) {
                 when (token) {
-                    is TokenLeftBracket -> {
-                        operationStack.add(token)
-                    }
-
-                    is TokenRightBracket -> {
-                        while (operationStack.lastOrNull() !is TokenLeftBracket){
-                            if (operationStack.isEmpty()) throw IncorrectBracketSequence("")
-                            if (valueStack.count() < 2) throw EvalException("")
-                            valueStack.add(TokenNumber((operationStack.removeLast() as TokenSign).getDelegate()
-                                (valueStack.removeLast().number, valueStack.removeLast().number)))
-                        }
-                        operationStack.removeLast()
-                    }
-
                     is TokenSign -> {
                         while (operationStack.isNotEmpty()) {
                             val next = operationStack.last()
-                            if (next is TokenLeftBracket) break
-                            if ((next as TokenSign).getPriority() < token.getPriority()) break
+                            if (next.priority < token.priority) break
                             operationStack.removeLast()
                             if (valueStack.count() < 2) throw EvalException("")
-                            valueStack.add(TokenNumber((next as TokenSign).getDelegate()
-                                (valueStack.removeLast().number, valueStack.removeLast().number)))
+                            val calculationResult = next.calculate(
+                                valueStack.removeLast().number,
+                                valueStack.removeLast().number
+                            )
+                            valueStack.add(TokenNumber(calculationResult))
                         }
 
                         operationStack.add(token)
                     }
 
                     is TokenNumber -> valueStack.add(token)
+
+                    else -> throw EvalException("")
                 }
             }
 
             while (operationStack.isNotEmpty()) {
                 val next = operationStack.removeLast()
-                if (next is TokenLeftBracket) throw IncorrectBracketSequence("")
                 if (valueStack.count() < 2) throw EvalException("")
-                valueStack.add(TokenNumber((next as TokenSign).getDelegate()
-                    (valueStack.removeLast().number, valueStack.removeLast().number)))
+                val calculationResult = next.calculate(
+                    valueStack.removeLast().number,
+                    valueStack.removeLast().number
+                )
+                valueStack.add(TokenNumber(calculationResult))
             }
 
             if (valueStack.count() != 1) throw EvalException("")
 
             return valueStack[0].number
+        }
+
+
+        fun eval(formula: String): Double {
+            var bracketCounter = 0
+
+            var operationQueue = mutableListOf<Token>()
+            val levelQueue = mutableListOf<MutableList<Token>>()
+
+            val tokens = tokenize(formula)
+
+            for (token in tokens) {
+                when (token) {
+                    is TokenLeftBracket -> {
+                        bracketCounter++
+                        levelQueue.add(operationQueue)
+                        operationQueue = mutableListOf()
+                    }
+
+                    is TokenRightBracket -> {
+                        bracketCounter--
+                        if (bracketCounter < 0)
+                            throw IncorrectBracketSequence("")
+                        val foldResult = TokenNumber(foldOperationQueue(operationQueue))
+                        operationQueue = levelQueue.removeLast()
+                        operationQueue.add(foldResult)
+                    }
+
+                    is TokenSign -> operationQueue.add(token)
+
+                    is TokenNumber -> operationQueue.add(token)
+                }
+            }
+
+            return foldOperationQueue(operationQueue)
         }
     }
 }
