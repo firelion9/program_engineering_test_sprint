@@ -72,148 +72,140 @@ fun toTokenNumber(word: String): TokenNumber {
 }
 
 
-class Parser private constructor() {
+fun tokenize(s: String): List<Token> {
+    val tokens = mutableListOf<Token>()
 
-    companion object {
+    val word = StringBuilder()
+    var wordContainsPoint = false
 
-        // Split by first number, sign or bracket
-        fun tokenize(s: String): List<Token> {
-            val tokens = mutableListOf<Token>()
+    for (c in s) {
 
-            val word = StringBuilder()
-            var wordContainsPoint = false
+        val isSignOrBracket = isSignOrBracket(c)
+        val isPoint = c == '.'
+        val isDigit = c.isDigit()
 
-            for (c in s) {
+        when {
+            isSignOrBracket || c.isWhitespace() -> {
+                if (word.isNotEmpty()) {
+                    tokens.add(toTokenNumber(word.toString()))
 
-                val isSignOrBracket = isSignOrBracket(c)
-                val isPoint = c == '.'
-                val isDigit = c.isDigit()
-
-                when {
-                    isSignOrBracket || c.isWhitespace() -> {
-                        if (word.isNotEmpty()) {
-                            tokens.add(toTokenNumber(word.toString()))
-
-                            word.clear()
-                        }
-                        wordContainsPoint = false
-
-                        if (!c.isWhitespace())
-                            tokens.add(toToken(c))
-                    }
-                    isPoint -> {
-                        if (wordContainsPoint)
-                            throw BadNumber("Double point in number")
-
-                        word.append(".")
-
-                        wordContainsPoint = true
-                    }
-                    isDigit -> word.append(c.toString())
-                    else -> throw UnsupportedSymbolException("Unsupported character")
+                    word.clear()
                 }
+                wordContainsPoint = false
+
+                if (!c.isWhitespace())
+                    tokens.add(toToken(c))
             }
-            if (word.isNotEmpty())
-                tokens.add(toTokenNumber(word.toString()))
+            isPoint -> {
+                if (wordContainsPoint)
+                    throw BadNumber("Double point in number")
 
-            return tokens
-        }
+                word.append(".")
 
-
-        private fun foldOperationQueue(tokens: List<Token>): Double {
-
-
-            val operationStack: Stack<TokenSign> = mutableListOf()
-            val valueStack : Stack<Double> = mutableListOf()
-
-            var previousTokenIsNotNumber = true
-            var previousIsUnaryMinus = false
-
-            for (token in tokens) {
-                when (token) {
-                    is TokenSign -> {
-                        val isUnaryMinus = token.signType == SignType.MINUS && previousTokenIsNotNumber
-                        if (isUnaryMinus) {
-                            previousIsUnaryMinus = true
-                            continue
-                        }
-
-                        while (operationStack.isNotEmpty()) {
-                            val next = operationStack.last()
-                            if (next.priority <= token.priority) break
-                            operationStack.removeLast()
-                            if (valueStack.count() < 2) throw EvalException("")
-                            val calculationResult = next.calculate(
-                                valueStack.removeLast(),
-                                valueStack.removeLast()
-                            )
-                            valueStack.add(calculationResult)
-                        }
-
-                        operationStack.add(token)
-                        previousTokenIsNotNumber = true
-                        previousIsUnaryMinus = false
-                    }
-
-                    is TokenNumber -> {
-                        val number = token.number * if (previousIsUnaryMinus) -1 else 1
-                        valueStack.add(number)
-
-                        previousTokenIsNotNumber = false
-                    }
-
-                    else -> throw EvalException("")
-                }
+                wordContainsPoint = true
             }
-
-            while (operationStack.isNotEmpty()) {
-                val next = operationStack.removeLast()
-                if (valueStack.count() < 2) throw EvalException("")
-                val calculationResult = next.calculate(
-                    valueStack.removeLast(),
-                    valueStack.removeLast()
-                )
-                valueStack.add(calculationResult)
-            }
-
-            if (valueStack.count() != 1) throw EvalException("")
-
-            return valueStack.first()
-        }
-
-
-        fun eval(formula: String): Double {
-            var bracketCounter = 0
-
-            var operationQueue = mutableListOf<Token>()
-            val levelQueue = mutableListOf<MutableList<Token>>()
-
-            val tokens = tokenize(formula)
-
-            for (token in tokens) {
-                when (token) {
-                    is TokenLeftBracket -> {
-                        bracketCounter++
-                        levelQueue.add(operationQueue)
-                        operationQueue = mutableListOf()
-                    }
-
-                    is TokenRightBracket -> {
-                        bracketCounter--
-                        if (bracketCounter < 0)
-                            throw IncorrectBracketSequence("")
-                        val foldResult = TokenNumber(foldOperationQueue(operationQueue))
-                        operationQueue = levelQueue.removeLast()
-                        operationQueue.add(foldResult)
-                    }
-
-                    is TokenSign -> operationQueue.add(token)
-
-                    is TokenNumber -> operationQueue.add(token)
-                }
-            }
-
-            return foldOperationQueue(operationQueue)
+            isDigit -> word.append(c.toString())
+            else -> throw UnsupportedSymbolException("Unsupported character")
         }
     }
+    if (word.isNotEmpty())
+        tokens.add(toTokenNumber(word.toString()))
+
+    return tokens
+}
+
+
+private fun foldOperationQueue(tokens: List<Token>): Double {
+
+    val operationStack: Stack<TokenSign> = mutableListOf()
+    val valueStack : Stack<Double> = mutableListOf()
+
+    var previousTokenIsNotNumber = true
+    var previousIsUnaryMinus = false
+
+    for (token in tokens) {
+        when (token) {
+            is TokenSign -> {
+                val isUnaryMinus = token.signType == SignType.MINUS && previousTokenIsNotNumber
+                if (isUnaryMinus) {
+                    previousIsUnaryMinus = true
+                    continue
+                }
+
+                while (operationStack.isNotEmpty()) {
+                    val next = operationStack.last()
+                    if (next.priority <= token.priority) break
+                    operationStack.removeLast()
+                    if (valueStack.count() < 2) throw EvalException("")
+                    val calculationResult = next.calculate(
+                        valueStack.removeLast(),
+                        valueStack.removeLast()
+                    )
+                    valueStack.add(calculationResult)
+                }
+
+                operationStack.add(token)
+                previousTokenIsNotNumber = true
+                previousIsUnaryMinus = false
+            }
+
+            is TokenNumber -> {
+                val number = token.number * if (previousIsUnaryMinus) -1 else 1
+                valueStack.add(number)
+
+                previousTokenIsNotNumber = false
+            }
+
+            else -> throw EvalException("")
+        }
+    }
+
+    while (operationStack.isNotEmpty()) {
+        val next = operationStack.removeLast()
+        if (valueStack.count() < 2) throw EvalException("")
+        val calculationResult = next.calculate(
+            valueStack.removeLast(),
+            valueStack.removeLast()
+        )
+        valueStack.add(calculationResult)
+    }
+
+    if (valueStack.count() != 1) throw EvalException("")
+
+    return valueStack.first()
+}
+
+
+fun eval(formula: String): Double {
+    var bracketCounter = 0
+
+    var operationQueue = mutableListOf<Token>()
+    val levelQueue = mutableListOf<MutableList<Token>>()
+
+    val tokens = tokenize(formula)
+
+    for (token in tokens) {
+        when (token) {
+            is TokenLeftBracket -> {
+                bracketCounter++
+                levelQueue.add(operationQueue)
+                operationQueue = mutableListOf()
+            }
+
+            is TokenRightBracket -> {
+                bracketCounter--
+                if (bracketCounter < 0)
+                    throw IncorrectBracketSequence("")
+                val foldResult = TokenNumber(foldOperationQueue(operationQueue))
+                operationQueue = levelQueue.removeLast()
+                operationQueue.add(foldResult)
+            }
+
+            is TokenSign -> operationQueue.add(token)
+
+            is TokenNumber -> operationQueue.add(token)
+        }
+    }
+
+    return foldOperationQueue(operationQueue)
 }
