@@ -10,10 +10,6 @@ class UnsupportedSymbolException(message: String): ParserException(message)
 class BadNumber(message: String): ParserException(message)
 class IncorrectBracketSequence(message: String): ParserException(message)
 
-fun <T> MutableList<T>.push(item: T) = this.add ( this.count(), item )
-fun <T> MutableList<T>.pop(): T? = if (this.isNotEmpty()) this.removeAt(this.count() - 1) else null
-fun <T> MutableList<T>.peek(): T? = if (this.isNotEmpty()) this[this.count() - 1] else null
-
 typealias Stack<T> = MutableList<T>
 
 private fun isSignOrBracket(c: Char): Boolean {
@@ -28,27 +24,6 @@ enum class SignType {
     PLUS, MINUS, MULTIPLICATION, DIVISION, POWER
 }
 
-fun SignType.getPriority(): Int {
-    return when (this) {
-        SignType.PLUS -> 1
-        SignType.MINUS -> 1
-        SignType.MULTIPLICATION -> 2
-        SignType.DIVISION -> 2
-        SignType.POWER -> 3
-        else -> throw ParserException("")
-    }
-}
-
-fun SignType.getDelegate(): (Double, Double) -> Double {
-    return when (this) {
-        SignType.PLUS -> { b, a -> a + b }
-        SignType.MINUS -> { b, a -> a - b }
-        SignType.MULTIPLICATION -> { b, a -> a * b }
-        SignType.DIVISION -> { b, a -> a / b }
-        SignType.POWER -> { b, a -> a.pow(b) }
-        else -> throw ParserException("")
-    }
-}
 
 class TokenNumber(val number: Double): Token {
     override fun toString() = "($number)"
@@ -56,6 +31,26 @@ class TokenNumber(val number: Double): Token {
 
 class TokenSign(val signType: SignType): TokenOperation {
     override fun toString() = "[$signType]"
+
+    fun getDelegate(): (Double, Double) -> Double {
+        return when (this.signType) {
+            SignType.PLUS -> { b, a -> a + b }
+            SignType.MINUS -> { b, a -> a - b }
+            SignType.MULTIPLICATION -> { b, a -> a * b }
+            SignType.DIVISION -> { b, a -> a / b }
+            SignType.POWER -> { b, a -> a.pow(b) }
+        }
+    }
+
+    fun getPriority(): Int {
+        return when (this.signType) {
+            SignType.PLUS -> 1
+            SignType.MINUS -> 1
+            SignType.MULTIPLICATION -> 2
+            SignType.DIVISION -> 2
+            SignType.POWER -> 3
+        }
+    }
 }
 
 class TokenLeftBracket: TokenOperation {
@@ -161,43 +156,43 @@ class Parser private constructor(formula: String) {
             for (token in tokens) {
                 when (token) {
                     is TokenLeftBracket -> {
-                        operationStack.push(token)
+                        operationStack.add(token)
                     }
 
                     is TokenRightBracket -> {
-                        while (operationStack.peek() !is TokenLeftBracket){
-                            if (operationStack.peek() == null) throw IncorrectBracketSequence("")
+                        while (operationStack.lastOrNull() !is TokenLeftBracket){
+                            if (operationStack.isEmpty()) throw IncorrectBracketSequence("")
                             if (valueStack.count() < 2) throw EvalException("")
-                            valueStack.push(TokenNumber((operationStack.pop() as TokenSign).signType.getDelegate()
-                                (valueStack.pop()!!.number, valueStack.pop()!!.number)))
+                            valueStack.add(TokenNumber((operationStack.removeLast() as TokenSign).getDelegate()
+                                (valueStack.removeLast().number, valueStack.removeLast().number)))
                         }
-                        operationStack.pop()
+                        operationStack.removeLast()
                     }
 
                     is TokenSign -> {
                         while (operationStack.isNotEmpty()) {
-                            val next = operationStack.peek()
+                            val next = operationStack.last()
                             if (next is TokenLeftBracket) break
-                            if ((next as TokenSign).signType.getPriority() < token.signType.getPriority()) break
-                            operationStack.pop()
+                            if ((next as TokenSign).getPriority() < token.getPriority()) break
+                            operationStack.removeLast()
                             if (valueStack.count() < 2) throw EvalException("")
-                            valueStack.push(TokenNumber((next as TokenSign).signType.getDelegate()
-                                (valueStack.pop()!!.number, valueStack.pop()!!.number)))
+                            valueStack.add(TokenNumber((next as TokenSign).getDelegate()
+                                (valueStack.removeLast().number, valueStack.removeLast().number)))
                         }
 
-                        operationStack.push(token)
+                        operationStack.add(token)
                     }
 
-                    is TokenNumber -> valueStack.push(token)
+                    is TokenNumber -> valueStack.add(token)
                 }
             }
 
             while (operationStack.isNotEmpty()) {
-                val next = operationStack.pop()
+                val next = operationStack.removeLast()
                 if (next is TokenLeftBracket) throw IncorrectBracketSequence("")
                 if (valueStack.count() < 2) throw EvalException("")
-                valueStack.push(TokenNumber((next as TokenSign).signType.getDelegate()
-                    (valueStack.pop()!!.number, valueStack.pop()!!.number)))
+                valueStack.add(TokenNumber((next as TokenSign).getDelegate()
+                    (valueStack.removeLast().number, valueStack.removeLast().number)))
             }
 
             if (valueStack.count() != 1) throw EvalException("")
