@@ -20,6 +20,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material.primarySurface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
@@ -40,7 +41,9 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.key.utf16CodePoint
 import androidx.compose.ui.unit.dp
 import org.tod87et.calculator.client.ApplicationState
+import org.tod87et.calculator.client.CalculatorTheme
 import org.tod87et.calculator.client.api.ApiResult
+import org.tod87et.calculator.client.md_theme_light_primaryContainer
 
 @Composable
 fun MainScreen(
@@ -205,7 +208,7 @@ private fun NumPad(
                 onClick = onCompute,
                 shape = MaterialTheme.shapes.small,
                 colors = ButtonDefaults.buttonColors(
-                    backgroundColor = MaterialTheme.colors.secondaryVariant
+                    backgroundColor = md_theme_light_primaryContainer
                 ),
                 enabled = !isComputing.value
             ) {
@@ -261,7 +264,7 @@ private fun RowScope.NumButton(text: String, onClick: () -> Unit) {
         onClick = onClick,
         shape = MaterialTheme.shapes.small,
         colors = ButtonDefaults.buttonColors(
-            backgroundColor = MaterialTheme.colors.secondaryVariant
+            backgroundColor = md_theme_light_primaryContainer
         )
     ) {
         Text(text, style = MaterialTheme.typography.h5)
@@ -272,7 +275,7 @@ private fun RowScope.NumButton(text: String, onClick: () -> Unit) {
 @Preview
 @Composable
 private fun NumPadPreview() {
-    MaterialTheme {
+    CalculatorTheme {
         NumPad(
             isComputing = remember { mutableStateOf(false) },
             onSymbols = {},
