@@ -33,14 +33,17 @@ class FormulasDb {
         transaction(database) { SchemaUtils.create(Formulas) }
     }
 
-    fun insertFormula(formula: String, result: Double) {
+    fun insertFormula(formula: String, result: Double): FormulaEntry {
+        val date = Instant.now()
+        var id: Int = -1
         transaction(database) {
-            Formulas.insert {
+            id = Formulas.insert {
                 it[Formulas.formula] = formula
                 it[Formulas.result] = result
-                it[Formulas.date] = Instant.now()
-            }
+                it[Formulas.date] = date
+            } get Formulas.id
         }
+        return FormulaEntry(id, formula, result, date)
     }
 
     /**
