@@ -1,6 +1,7 @@
 package org.tod87et.calculator.client.api
 
 import kotlinx.coroutines.delay
+import kotlin.math.max
 
 class LocalAppApi : AppApi {
     private val history = mutableListOf<ComputationResult>()
@@ -21,7 +22,7 @@ class LocalAppApi : AppApi {
     override val historyApi: HistoryApi = object : HistoryApi {
         override suspend fun listHistory(offset: Int, limit: Int): ApiResult<List<ComputationResult>> = runApi {
             val fromIndex = (history.size - offset - limit).coerceAtLeast(0)
-            history.subList(fromIndex, (fromIndex + limit).coerceAtMost(history.size)).toList()
+            history.subList(fromIndex, (fromIndex + limit).coerceAtMost(max(0, history.size - offset))).toList()
         }
 
         override suspend fun removeItem(id: String): ApiResult<Unit> = runApi {

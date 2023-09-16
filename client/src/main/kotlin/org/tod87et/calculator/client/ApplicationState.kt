@@ -1,5 +1,7 @@
 package org.tod87et.calculator.client
 
+import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.SnackbarDuration
 import androidx.compose.material.SnackbarHostState
 import androidx.compose.material.SnackbarResult
@@ -7,6 +9,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.CoroutineScope
@@ -134,6 +137,93 @@ sealed interface ApplicationState {
             coroutineScope: CoroutineScope,
         ) {
             updateAppState(ConnectionInitializationScreen(snackbarHostState, hostString))
+        }
+
+        fun flowToHistoryScreen(
+            updateAppState: (ApplicationState) -> Unit,
+            coroutineScope: CoroutineScope,
+        ) {
+            updateAppState(HistoryScreen(snackbarHostState, hostString, appApi, expression))
+        }
+    }
+
+    @Stable
+    class HistoryScreen(
+        override val snackbarHostState: SnackbarHostState,
+        val hostString: String,
+        val appApi: AppApi,
+        val calculatorExpression: String,
+        val lazyListState: LazyListState = LazyListState(0),
+    ) : ApplicationState {
+        private val itemsCache = mutableStateListOf<ComputationResult>()
+        val historyItems: List<ComputationResult> get() = itemsCache
+
+        private val isLoadingItemsState = mutableStateOf(false)
+        val isLoadingItems by isLoadingItemsState
+
+        private val hasMoreItemsState = mutableStateOf(true)
+        val hasMoreItems by hasMoreItemsState
+
+        fun onItemComposed(coroutineScope: CoroutineScope, id: String) {
+            if (itemsCache.isEmpty() || itemsCache.lastOrNull()?.id == id) {
+                loadMoreItems(coroutineScope)
+            }
+        }
+
+        fun loadMoreItems(coroutineScope: CoroutineScope) {
+            coroutineScope.launch {
+                if (!hasMoreItems || isLoadingItems) {
+                    return@launch
+                }
+
+                isLoadingItemsState.value = true
+
+                try {
+                    when (val newItemsRes = appApi.historyApi.listHistory(offset = itemsCache.size)) {
+                        is ApiResult.Failure -> {
+                            coroutineScope.launch {
+                                showSnackbar("Cannot load history items")
+                            }
+                        }
+
+                        is ApiResult.Success -> {
+                            if (newItemsRes.result.isEmpty()) {
+                                hasMoreItemsState.value = false
+                            }
+                            val lastTimestamp = itemsCache.lastOrNull()?.timestamp ?: Long.MAX_VALUE
+                            itemsCache += newItemsRes.result.asReversed()
+                                .asSequence().filter { it.timestamp < lastTimestamp }
+                        }
+                    }
+                } finally {
+                    isLoadingItemsState.value = false
+                }
+            }
+        }
+
+        fun flowToMainScreen(
+            updateAppState: (ApplicationState) -> Unit,
+            coroutineScope: CoroutineScope,
+        ) {
+            updateAppState(MainScreen(snackbarHostState, hostString, appApi, calculatorExpression))
+        }
+
+        fun removeItem(coroutineScope: CoroutineScope, id: String) {
+            coroutineScope.launch {
+                val itemIndex = itemsCache.indexOfFirst { it.id == id }
+                if (itemIndex == -1) {
+                    return@launch
+                }
+
+                when (appApi.historyApi.removeItem(id)) {
+                    is ApiResult.Failure -> {
+                        showSnackbar("Failed to remove history item")
+                    }
+                    is ApiResult.Success -> {
+                        itemsCache.removeAt(itemIndex)
+                    }
+                }
+            }
         }
     }
 

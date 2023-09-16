@@ -116,6 +116,16 @@ fun MainScreen(
                 }
 
                 Text("Current server: ${state.hostString}")
+
+                Spacer(modifier.weight(1f))
+
+                OutlinedButton(
+                    onClick = {
+                        state.flowToHistoryScreen(updateAppState, coroutineScope)
+                    }
+                ) {
+                    Text("History")
+                }
             }
 
             Spacer(modifier.weight(1f))

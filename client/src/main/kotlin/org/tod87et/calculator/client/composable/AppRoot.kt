@@ -18,5 +18,9 @@ fun AppRoot(
         is ApplicationState.MainScreen -> {
             MainScreen(appState, updateAppState, modifier)
         }
+
+        is ApplicationState.HistoryScreen -> {
+            HistoryScreen(appState, updateAppState, modifier)
+        }
     }
 }
