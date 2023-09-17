@@ -191,7 +191,7 @@ class ServerTest {
         try {
             eval(expression)
         } catch (e: Exception) {
-            message = e.message ?: ""
+            message = e.message ?: "Undefined server error"
         }
 
         val body = response.bodyAsText()
