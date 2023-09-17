@@ -4,18 +4,18 @@ import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.builtins.ArraySerializer
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.encodeToJsonElement
 import org.tod87et.calculator.server.database
 import org.tod87et.calculator.server.models.ComputationResult
 import org.tod87et.calculator.server.models.toComputationResult
 
+@ExperimentalSerializationApi
 fun Route.historyRouting() {
     route("/history") {
         route("/list") {
-            get() {
+            get {
                 val limit = call.request.queryParameters["limit"]?.toIntOrNull() ?: Int.MAX_VALUE
                 val offset = call.request.queryParameters["offset"]?.toIntOrNull() ?: 0
 
