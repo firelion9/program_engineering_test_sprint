@@ -6,7 +6,6 @@ import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -130,8 +129,6 @@ fun MainScreen(
                 }
             }
 
-            Spacer(modifier.weight(1f))
-
             Column(
                 modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -164,6 +161,7 @@ fun MainScreen(
                     modifier = Modifier.fillMaxWidth(),
                 )
                 NumPad(
+                    modifier = Modifier.fillMaxSize(),
                     isComputing = remember {
                         derivedStateOf {
                             state.isWaitingForResponse
@@ -178,8 +176,6 @@ fun MainScreen(
                     }
                 )
             }
-
-            Spacer(modifier.weight(1f))
         }
     }
 }
@@ -192,62 +188,55 @@ private fun NumPad(
     onSymbols: (String) -> Unit,
     onCompute: () -> Unit,
 ) {
-    Column(modifier = modifier) {
-        Row {
-            NumButton("(", onSymbols = onSymbols)
-            NumButton(")", onSymbols = onSymbols)
-            NumButton(
-                "\u232B", // ⌫
-                onClick = {
-                    onBackspace(false)
-                }
-            )
-            OutlinedButton(
-                modifier = Modifier.weight(1f),
-                onClick = onCompute,
-                shape = MaterialTheme.shapes.small,
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = md_theme_light_primaryContainer
-                ),
-                enabled = !isComputing.value
-            ) {
-                if (isComputing.value) {
-                    CircularProgressIndicator(modifier = Modifier.size(30.dp))
-                } else {
-                    Text("=", style = MaterialTheme.typography.h5)
-                }
+    AdaptiveGrid(modifier = modifier, columns = 4) {
+        NumButton("(", onSymbols = onSymbols)
+        NumButton(")", onSymbols = onSymbols)
+        NumButton(
+            "\u232B", // ⌫
+            onClick = {
+                onBackspace(false)
             }
+        )
+        OutlinedButton(
+            modifier = Modifier.fillMaxSize(),
+            onClick = onCompute,
+            shape = MaterialTheme.shapes.small,
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = md_theme_light_primaryContainer
+            ),
+            enabled = !isComputing.value
+        ) {
+            if (isComputing.value) {
+                CircularProgressIndicator(modifier = Modifier.size(30.dp))
+            } else {
+                Text("=", style = MaterialTheme.typography.h5)
+            }
+        }
 
-        }
-        Row {
-            NumButton("+", onSymbols = onSymbols)
-            NumButton("7", onSymbols = onSymbols)
-            NumButton("8", onSymbols = onSymbols)
-            NumButton("9", onSymbols = onSymbols)
-        }
-        Row {
-            NumButton("-", onSymbols = onSymbols)
-            NumButton("4", onSymbols = onSymbols)
-            NumButton("5", onSymbols = onSymbols)
-            NumButton("6", onSymbols = onSymbols)
-        }
-        Row {
-            NumButton("*", onSymbols = onSymbols)
-            NumButton("1", onSymbols = onSymbols)
-            NumButton("2", onSymbols = onSymbols)
-            NumButton("3", onSymbols = onSymbols)
-        }
-        Row {
-            NumButton("/", onSymbols = onSymbols)
-            NumButton("^", onSymbols = onSymbols)
-            NumButton("0", onSymbols = onSymbols)
-            NumButton(".", onSymbols = onSymbols)
-        }
+        NumButton("+", onSymbols = onSymbols)
+        NumButton("7", onSymbols = onSymbols)
+        NumButton("8", onSymbols = onSymbols)
+        NumButton("9", onSymbols = onSymbols)
+
+        NumButton("-", onSymbols = onSymbols)
+        NumButton("4", onSymbols = onSymbols)
+        NumButton("5", onSymbols = onSymbols)
+        NumButton("6", onSymbols = onSymbols)
+
+        NumButton("*", onSymbols = onSymbols)
+        NumButton("1", onSymbols = onSymbols)
+        NumButton("2", onSymbols = onSymbols)
+        NumButton("3", onSymbols = onSymbols)
+
+        NumButton("/", onSymbols = onSymbols)
+        NumButton("^", onSymbols = onSymbols)
+        NumButton("0", onSymbols = onSymbols)
+        NumButton(".", onSymbols = onSymbols)
     }
 }
 
 @Composable
-private fun RowScope.NumButton(text: String, onSymbols: (String) -> Unit) {
+private fun NumButton(text: String, onSymbols: (String) -> Unit) {
     NumButton(
         text = text,
         onClick = {
@@ -257,9 +246,9 @@ private fun RowScope.NumButton(text: String, onSymbols: (String) -> Unit) {
 }
 
 @Composable
-private fun RowScope.NumButton(text: String, onClick: () -> Unit) {
+private fun NumButton(text: String, onClick: () -> Unit) {
     OutlinedButton(
-        modifier = Modifier.weight(1f),
+        modifier = Modifier.fillMaxSize(),
         onClick = onClick,
         shape = MaterialTheme.shapes.small,
         colors = ButtonDefaults.buttonColors(
