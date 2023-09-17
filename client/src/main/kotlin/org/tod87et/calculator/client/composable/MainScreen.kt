@@ -63,7 +63,7 @@ fun MainScreen(
             .focusable()
             .onPreviewKeyEvent {
                 if (it.type != KeyEventType.KeyDown) {
-                    return@onPreviewKeyEvent false
+                    return@onPreviewKeyEvent it.key == Key.Enter
                 }
 
                 when {
