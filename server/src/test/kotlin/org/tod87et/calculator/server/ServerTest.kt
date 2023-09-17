@@ -1,15 +1,16 @@
 package org.tod87et.calculator.server
 
 import io.ktor.client.call.*
+import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.testing.*
 import io.zonky.test.db.postgres.embedded.EmbeddedPostgres
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.assertAll
 import org.tod87et.calculator.server.database.FormulasDb
 import org.tod87et.calculator.server.models.ComputationResult
 import org.tod87et.calculator.server.models.ComputeRequest
@@ -36,8 +37,14 @@ class ServerTest {
 
     @Test
     fun checkCalculator_200_Ok() = testApplication {
+        val client = createClient {
+            install(ContentNegotiation) {
+                json()
+            }
+        }
         val expression = "1+2"
         val response = client.post(computePath) {
+            contentType(ContentType.Application.Json)
             setBody(ComputeRequest(expression))
         }
         assertEquals(HttpStatusCode.OK, response.status)
@@ -51,12 +58,18 @@ class ServerTest {
 
     @Test
     fun checkHistoryGet() = testApplication {
+        val client = createClient {
+            install(ContentNegotiation) {
+                json()
+            }
+        }
         val requests = arrayOf("1 + 2" to 3, "6/2*(1+2)" to 9, "5^-1" to 0.2)
         val buffer = mutableListOf<ComputationResult>()
         requests.forEach { element ->
             val expression = element.first
             val response = client.post(computePath) {
-                ComputeRequest(expression)
+                contentType(ContentType.Application.Json)
+                setBody(ComputeRequest(expression))
             }
             assertEquals(HttpStatusCode.OK, response.status)
             buffer.add(response.body<ComputationResult>())
@@ -103,12 +116,18 @@ class ServerTest {
 
     @Test
     fun checkHistoryDelete() = testApplication {
+        val client = createClient {
+            install(ContentNegotiation) {
+                json()
+            }
+        }
         val requests = arrayOf("5" to 5, "((10 + 2) / (6))" to 2, "10^0" to 1)
         val buffer = mutableListOf<ComputationResult>()
         requests.forEach { element ->
             val expression = element.first
             val response = client.post(computePath) {
-                ComputeRequest(expression)
+                contentType(ContentType.Application.Json)
+                setBody(ComputeRequest(expression))
             }
             assertEquals(HttpStatusCode.OK, response.status)
             buffer.add(response.body<ComputationResult>())
@@ -129,6 +148,11 @@ class ServerTest {
 
     @Test
     fun checkParserResult() = testApplication {
+        val client = createClient {
+            install(ContentNegotiation) {
+                json()
+            }
+        }
         val requests = arrayOf(
             "1 + 2" to 3, "6/2*(1+2)" to 9, "5^-1" to 0.2,
             "5" to 5, "((10 + 2) / (6))" to 2, "10^0" to 1,
@@ -137,7 +161,8 @@ class ServerTest {
         requests.forEach { element ->
             val expression = element.first
             val response = client.post(computePath) {
-                ComputeRequest(expression)
+                contentType(ContentType.Application.Json)
+                setBody(ComputeRequest(expression))
             }
             assertEquals(HttpStatusCode.OK, response.status)
             buffer.add(response.body<ComputationResult>())
@@ -150,8 +175,14 @@ class ServerTest {
 
     @Test
     fun checkParserBadResult() = testApplication {
+        val client = createClient {
+            install(ContentNegotiation) {
+                json()
+            }
+        }
         val expression = "*5"
         val response = client.post(computePath) {
+            contentType(ContentType.Application.Json)
             setBody(ComputeRequest(expression))
         }
         assertEquals(HttpStatusCode.BadRequest, response.status)
