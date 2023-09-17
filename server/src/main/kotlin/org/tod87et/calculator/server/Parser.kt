@@ -73,7 +73,7 @@ fun toToken(c: Char): Token =
     }
 
 fun toTokenNumber(word: String): TokenNumber {
-    return TokenNumber(word.toDoubleOrNull() ?: throw UnsupportedSymbolException(word))
+    return TokenNumber(word.toDoubleOrNull() ?: throw BadNumber("Incorrect number: $word"))
 }
 
 
@@ -81,7 +81,6 @@ fun tokenize(s: String): List<Token> {
     val tokens = mutableListOf<Token>()
 
     val word = StringBuilder()
-    var wordContainsPoint = false
 
     for (c in s) {
 
@@ -96,21 +95,12 @@ fun tokenize(s: String): List<Token> {
 
                     word.clear()
                 }
-                wordContainsPoint = false
 
                 if (!c.isWhitespace())
                     tokens.add(toToken(c))
             }
-            isPoint -> {
-                if (wordContainsPoint)
-                    throw BadNumber("Double point in number")
-
-                word.append(".")
-
-                wordContainsPoint = true
-            }
-            isDigit -> word.append(c.toString())
-            else -> throw UnsupportedSymbolException("Unsupported character")
+            isDigit || isPoint -> word.append(c.toString())
+            else -> throw UnsupportedSymbolException("Unsupported character: $c")
         }
     }
     if (word.isNotEmpty())
@@ -141,7 +131,7 @@ private fun foldOperationQueue(tokens: List<Token>): Double {
                     val next = operationStack.last()
                     if (next.priority < token.priority || (next.signType == token.signType && next.isRightAssociative)) break
                     operationStack.removeLast()
-                    if (valueStack.count() < 2) throw EvalException("")
+                    if (valueStack.count() < 2) throw EvalException("Incorrect expression")
                     val calculationResult = next.calculate(
                         valueStack.removeLast(),
                         valueStack.removeLast()
@@ -161,13 +151,13 @@ private fun foldOperationQueue(tokens: List<Token>): Double {
                 previousTokenIsNotNumber = false
             }
 
-            else -> throw EvalException("")
+            else -> throw EvalException("Incorrect state")
         }
     }
 
     while (operationStack.isNotEmpty()) {
         val next = operationStack.removeLast()
-        if (valueStack.count() < 2) throw EvalException("")
+        if (valueStack.count() < 2) throw EvalException("Incorrect expression")
         val calculationResult = next.calculate(
             valueStack.removeLast(),
             valueStack.removeLast()
@@ -175,7 +165,7 @@ private fun foldOperationQueue(tokens: List<Token>): Double {
         valueStack.add(calculationResult)
     }
 
-    if (valueStack.count() != 1) throw EvalException("")
+    if (valueStack.count() != 1) throw EvalException("Incorrect state")
 
     return valueStack.first()
 }
@@ -200,7 +190,7 @@ fun eval(formula: String): Double {
             is TokenRightBracket -> {
                 bracketCounter--
                 if (bracketCounter < 0)
-                    throw IncorrectBracketSequence("")
+                    throw IncorrectBracketSequence("IncorrectBracketSequence")
                 val foldResult = TokenNumber(foldOperationQueue(operationQueue))
                 operationQueue = levelQueue.removeLast()
                 operationQueue.add(foldResult)
