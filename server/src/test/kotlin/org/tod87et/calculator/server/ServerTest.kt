@@ -134,12 +134,13 @@ class ServerTest {
         }
         // ^ Preparations
 
-        val order = intArrayOf(1, 0, 2)
-        order.forEach { index ->
-            val response = client.delete("$removePath/${buffer[index].id}")
-            val body = response.body<ComputationResult>()
+        val order = listOf(1, 0, 2)
+        order.forEachIndexed { round, index ->
+            var response = client.delete("$removePath/${buffer[index].id}")
             assertEquals(HttpStatusCode.OK, response.status)
-            assertEquals(buffer[index], body)
+            response = client.get(listPath)
+            val list = response.body<List<ComputationResult>>()
+            assertContentEquals(buffer.slice(order.subList(round + 1, order.size).sorted()), list)
         }
         val response = client.get(listPath)
         val list = response.body<List<ComputationResult>>()
