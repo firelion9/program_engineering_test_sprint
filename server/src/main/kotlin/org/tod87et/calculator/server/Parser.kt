@@ -33,6 +33,11 @@ data class TokenSign(val signType: SignType): Token {
         SignType.POWER -> 3
     }
 
+    val isRightAssociative = when (this.signType) {
+        SignType.POWER -> true
+        else -> false
+    }
+
     fun calculate(b: Double, a: Double): Double {
         return when (this.signType) {
             SignType.PLUS -> a + b
@@ -134,7 +139,7 @@ private fun foldOperationQueue(tokens: List<Token>): Double {
 
                 while (operationStack.isNotEmpty()) {
                     val next = operationStack.last()
-                    if (next.priority <= token.priority) break
+                    if (next.priority < token.priority || (next.signType == token.signType && next.isRightAssociative)) break
                     operationStack.removeLast()
                     if (valueStack.count() < 2) throw EvalException("")
                     val calculationResult = next.calculate(
