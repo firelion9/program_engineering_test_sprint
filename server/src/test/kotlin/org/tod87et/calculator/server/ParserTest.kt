@@ -46,8 +46,8 @@ class ParserTest {
         assertEquals(-30.0, eval("(3 * -(7 + 3)"))
         assertEquals(256.0, eval("2^2^3")) // power is right-associative
         assertEquals(134217728.0, eval("2^(1+2)^3"))
-        assertEquals(1, eval("16 / 8 / 2")) // division is left-associative
-        assertEquals(1, eval("18 /6/ 3"))
+        assertEquals(1.0, eval("16 / 8 / 2")) // division is left-associative
+        assertEquals(1.0, eval("18 /6/ 3"))
         assertEquals(18.0, eval("(6+2*7)-((3^2-1*2)+(7-2^2*3))"))
     }
 }
