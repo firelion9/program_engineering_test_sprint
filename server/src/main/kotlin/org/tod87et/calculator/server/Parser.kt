@@ -1,5 +1,6 @@
 package org.tod87et.calculator.server
 
+import io.ktor.util.*
 import java.lang.StringBuilder
 import kotlin.math.pow
 
@@ -85,10 +86,10 @@ fun tokenize(s: String): List<Token> {
     for (c in s) {
 
         val isSignOrBracket = isSignOrBracket(c)
-        val isPoint = c == '.'
-        val isDigit = c.isDigit()
-
+        val isDigit = c.isDigit() || c == '.' || c == 'e' || c == '-' && word.lastOrNull() == 'e'
         when {
+            isDigit -> word.append(c)
+
             isSignOrBracket || c.isWhitespace() -> {
                 if (word.isNotEmpty()) {
                     tokens.add(toTokenNumber(word.toString()))
@@ -99,7 +100,6 @@ fun tokenize(s: String): List<Token> {
                 if (!c.isWhitespace())
                     tokens.add(toToken(c))
             }
-            isDigit || isPoint -> word.append(c.toString())
             else -> throw UnsupportedSymbolException("Unsupported character: $c")
         }
     }
@@ -177,7 +177,7 @@ fun eval(formula: String): Double {
     var operationQueue = mutableListOf<Token>()
     val levelQueue = mutableListOf<MutableList<Token>>()
 
-    val tokens = tokenize(formula)
+    val tokens = tokenize(formula.toLowerCasePreservingASCIIRules())
 
     for (token in tokens) {
         when (token) {

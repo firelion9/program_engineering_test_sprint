@@ -185,6 +185,28 @@ class ServerTest {
         assertEquals(message, body, "Should be equal to parse error message")
     }
 
+    @Test
+    fun checkESupport() = testJsonApplication { client ->
+        val requests = arrayOf(
+            "1E5" to 1e5, "2E3*10" to 2e4, "1E-1" to 1e-1, "-1.2457E-2" to -0.012457,
+            "2^1E1" to 1024.0, "9E3/2E2" to 4.5e1, "1E2+3-2E1" to 83.0
+        )
+        val buffer = mutableListOf<ComputationResult>()
+        requests.forEach { element ->
+            val expression = element.first
+            val response = client.post(computePath) {
+                contentType(ContentType.Application.Json)
+                setBody(ComputeRequest(expression))
+            }
+            assertEquals(HttpStatusCode.OK, response.status)
+            buffer.add(response.body<ComputationResult>())
+        }
+        for (index in requests.indices) {
+            assertEquals(requests[index].second, buffer[index].result,
+                "Parser is not working for ${requests[index].first}")
+        }
+    }
+
     @AfterEach
     fun clearTestDatabase() {
         database.clear()
