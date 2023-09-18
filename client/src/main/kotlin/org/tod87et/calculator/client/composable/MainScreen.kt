@@ -188,12 +188,17 @@ private fun NumPad(
     onCompute: () -> Unit,
 ) {
     AdaptiveGrid(modifier = modifier, columns = 4) {
-        NumButton("(", onSymbols = onSymbols)
-        NumButton(")", onSymbols = onSymbols)
+        NumButton("/", onSymbols = onSymbols)
         NumButton(
             "\u232B", // ⌫
             onClick = {
                 onBackspace(false)
+            }
+        )
+        NumButton(
+            "AC",
+            onClick = {
+                onBackspace(true)
             }
         )
         OutlinedButton(
@@ -227,10 +232,13 @@ private fun NumPad(
         NumButton("2", onSymbols = onSymbols)
         NumButton("3", onSymbols = onSymbols)
 
-        NumButton("/", onSymbols = onSymbols)
         NumButton("^", onSymbols = onSymbols)
+        NumButton("00", onSymbols = onSymbols)
         NumButton("0", onSymbols = onSymbols)
         NumButton(".", onSymbols = onSymbols)
+
+        NumButton("(", onSymbols = onSymbols)
+        NumButton(")", onSymbols = onSymbols)
     }
 }
 
