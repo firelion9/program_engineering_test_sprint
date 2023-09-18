@@ -85,10 +85,10 @@ fun tokenize(s: String): List<Token> {
     for (c in s) {
 
         val isSignOrBracket = isSignOrBracket(c)
-        val isPoint = c == '.'
-        val isDigit = c.isDigit()
-
+        val isDigit = c.isDigit() || c == '.' || c == 'E' || c == '-' && word.lastOrNull() == 'E'
         when {
+            isDigit -> word.append(c)
+
             isSignOrBracket || c.isWhitespace() -> {
                 if (word.isNotEmpty()) {
                     tokens.add(toTokenNumber(word.toString()))
@@ -99,7 +99,6 @@ fun tokenize(s: String): List<Token> {
                 if (!c.isWhitespace())
                     tokens.add(toToken(c))
             }
-            isDigit || isPoint -> word.append(c.toString())
             else -> throw UnsupportedSymbolException("Unsupported character: $c")
         }
     }

@@ -188,8 +188,8 @@ class ServerTest {
     @Test
     fun checkESupport() = testJsonApplication { client ->
         val requests = arrayOf(
-            "1E5" to 1e5, "2E3*10" to 2e4, "1E-1" to 1e-1,
-            "7^1E1" to 7, "9E3/2E2" to 4.5e1, "1E2+3-2E1" to 83
+            "1E5" to 1e5, "2E3*10" to 2e4, "1E-1" to 1e-1, "-1.2457E-2" to -0.012457,
+            "2^1E1" to 1024.0, "9E3/2E2" to 4.5e1, "1E2+3-2E1" to 83.0
         )
         val buffer = mutableListOf<ComputationResult>()
         requests.forEach { element ->
