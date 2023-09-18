@@ -28,7 +28,7 @@ fun Route.historyRouting() {
                 status = HttpStatusCode.BadRequest
             )
             try {
-                if(database.deleteFormula(id)) {
+                if (database.deleteFormula(id)) {
                     return@delete call.respondText(
                         "OK",
                         status = HttpStatusCode.OK
