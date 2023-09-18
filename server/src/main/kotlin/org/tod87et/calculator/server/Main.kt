@@ -1,5 +1,6 @@
 package org.tod87et.calculator.server
 
+import io.ktor.server.netty.*
 import io.zonky.test.db.postgres.embedded.EmbeddedPostgres
 import org.tod87et.calculator.server.database.FormulasDb
 import javax.sql.DataSource
@@ -24,7 +25,7 @@ fun main(args: Array<String>) {
             password = databasePassword,
         )
     }
-    io.ktor.server.netty.EngineMain.main(args)
+    EngineMain.main(args)
     embeddedPostgres?.close()
 }
 
