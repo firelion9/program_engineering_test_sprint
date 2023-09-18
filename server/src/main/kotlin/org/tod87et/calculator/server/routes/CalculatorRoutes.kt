@@ -27,18 +27,10 @@ fun Route.calculatorRouting() {
                 val response = database.insertFormula(expression, result)
                 call.respond(HttpStatusCode.OK, response)
             } catch (e : Exception) {
-                if (e.message != null) {
-                    val exceptionMessage = e.message ?: ""
-                    call.respondText(
-                        exceptionMessage,
-                        status = HttpStatusCode.BadRequest
-                    )
-                } else {
-                    call.respondText(
-                        "Undefined server error",
-                        status = HttpStatusCode.InternalServerError
-                    )
-                }
+                call.respondText(
+                    e.message ?: "Undefined server error",
+                    status = HttpStatusCode.InternalServerError
+                )
             }
         }
     }
