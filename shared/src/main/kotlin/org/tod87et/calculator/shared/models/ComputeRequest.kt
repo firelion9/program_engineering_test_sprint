@@ -1,4 +1,4 @@
-package org.tod87et.calculator.server.models
+package org.tod87et.calculator.shared.models
 
 import kotlinx.serialization.Serializable
 
