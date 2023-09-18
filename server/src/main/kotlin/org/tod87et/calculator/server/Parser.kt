@@ -1,6 +1,5 @@
 package org.tod87et.calculator.server
 
-import io.ktor.util.*
 import java.lang.StringBuilder
 import kotlin.math.pow
 
@@ -83,10 +82,10 @@ fun tokenize(s: String): List<Token> {
 
     val word = StringBuilder()
 
-    for (c in s) {
-
+    for (c in s.lowercase()) {
         val isSignOrBracket = isSignOrBracket(c)
         val isDigit = c.isDigit() || c == '.' || c == 'e' || c == '-' && word.lastOrNull() == 'e'
+
         when {
             isDigit -> word.append(c)
 
@@ -177,7 +176,7 @@ fun eval(formula: String): Double {
     var operationQueue = mutableListOf<Token>()
     val levelQueue = mutableListOf<MutableList<Token>>()
 
-    val tokens = tokenize(formula.toLowerCasePreservingASCIIRules())
+    val tokens = tokenize(formula)
 
     for (token in tokens) {
         when (token) {
