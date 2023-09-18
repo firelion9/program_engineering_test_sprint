@@ -207,6 +207,21 @@ sealed interface ApplicationState {
             updateAppState(MainScreen(snackbarHostState, hostString, appApi, calculatorExpression))
         }
 
+        fun onItemClick(
+            item: ComputationResult,
+            updateAppState: (ApplicationState) -> Unit,
+            coroutineScope: CoroutineScope,
+        ) {
+            updateAppState(
+                MainScreen(
+                    snackbarHostState,
+                    hostString,
+                    appApi,
+                    item.expression
+                )
+            )
+        }
+
         fun removeItem(coroutineScope: CoroutineScope, id: String) {
             coroutineScope.launch {
                 val itemIndex = itemsCache.indexOfFirst { it.id == id }
