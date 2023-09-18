@@ -4,6 +4,7 @@ plugins {
     kotlin("jvm")
     kotlin("plugin.serialization")
     id("org.jetbrains.compose")
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 group = "org.tod87et.calculator"
@@ -13,6 +14,12 @@ val coroutinesVersion get() = rootProject.extra["kotlinx.coroutines.version"]
 val serializationVersion get() = rootProject.extra["kotlinx.serialization.version"]
 val kTorVersion get() = rootProject.extra["ktor.version"]
 val kotlinxDatetimeVersion = extra["kotlinx-datetime.version"] as String
+
+tasks.withType<Jar> {
+    manifest {
+        attributes["Main-Class"] = "org.tod87et.calculator.client.MainKt"
+    }
+}
 
 dependencies {
     // Note, if you develop a library, you should use compose.desktop.common.
