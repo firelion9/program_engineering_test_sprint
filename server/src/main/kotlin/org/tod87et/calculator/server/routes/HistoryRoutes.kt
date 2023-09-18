@@ -14,9 +14,9 @@ fun Route.historyRouting() {
 
             try {
                 val dbResponse = database.selectFormulas(limit, offset.toLong())
-                return@get call.respond(HttpStatusCode.OK, dbResponse)
+                call.respond(HttpStatusCode.OK, dbResponse)
             } catch (e: Exception) {
-                return@get call.respondText(
+                call.respondText(
                     e.message ?: "Undefined server error",
                     status = HttpStatusCode.InternalServerError
                 )
@@ -29,18 +29,18 @@ fun Route.historyRouting() {
             )
             try {
                 if (database.deleteFormula(id)) {
-                    return@delete call.respondText(
+                    call.respondText(
                         "OK",
                         status = HttpStatusCode.OK
                     )
                 } else {
-                    return@delete call.respondText(
+                    call.respondText(
                         "Formula not found",
                         status = HttpStatusCode.NotFound
                     )
                 }
             } catch (e : Exception) {
-                return@delete call.respondText(
+                call.respondText(
                     "Undefined server error",
                     status = HttpStatusCode.InternalServerError
                 )
