@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.IconButton
@@ -201,13 +202,10 @@ private fun NumPad(
                 onBackspace(true)
             }
         )
-        OutlinedButton(
+        Button(
             modifier = Modifier.fillMaxSize(),
             onClick = onCompute,
             shape = MaterialTheme.shapes.small,
-            colors = ButtonDefaults.buttonColors(
-                backgroundColor = md_theme_light_primaryContainer
-            ),
             enabled = !isComputing.value
         ) {
             if (isComputing.value) {
