@@ -34,18 +34,27 @@ fun Route.historyRouting() {
                     "Missing id",
                     status = HttpStatusCode.BadRequest
                 )
-                if(database.deleteFormula(id)) {
+                try {
+                    if(database.deleteFormula(id)) {
+                        return@delete call.respondText(
+                            "OK",
+                            status = HttpStatusCode.OK
+                        )
+                    }
+                    else {
+                        return@delete call.respondText(
+                            "Formula not found",
+                            status = HttpStatusCode.NotFound
+                        )
+                    }
+                }
+                catch (e : Exception) {
                     return@delete call.respondText(
-                        "OK",
-                        status = HttpStatusCode.OK
+                        "Undefined server error",
+                        status = HttpStatusCode.InternalServerError
                     )
                 }
-                else {
-                    return@delete call.respondText(
-                        "Formula not found",
-                        status = HttpStatusCode.NotFound
-                    )
-                }
+
 
             }
         }
