@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.IconButton
@@ -188,21 +189,23 @@ private fun NumPad(
     onCompute: () -> Unit,
 ) {
     AdaptiveGrid(modifier = modifier, columns = 4) {
-        NumButton("(", onSymbols = onSymbols)
-        NumButton(")", onSymbols = onSymbols)
+        NumButton("/", onSymbols = onSymbols)
         NumButton(
             "\u232B", // ⌫
             onClick = {
                 onBackspace(false)
             }
         )
-        OutlinedButton(
+        NumButton(
+            "AC",
+            onClick = {
+                onBackspace(true)
+            }
+        )
+        Button(
             modifier = Modifier.fillMaxSize(),
             onClick = onCompute,
             shape = MaterialTheme.shapes.small,
-            colors = ButtonDefaults.buttonColors(
-                backgroundColor = md_theme_light_primaryContainer
-            ),
             enabled = !isComputing.value
         ) {
             if (isComputing.value) {
@@ -227,10 +230,14 @@ private fun NumPad(
         NumButton("2", onSymbols = onSymbols)
         NumButton("3", onSymbols = onSymbols)
 
-        NumButton("/", onSymbols = onSymbols)
         NumButton("^", onSymbols = onSymbols)
+        NumButton("00", onSymbols = onSymbols)
         NumButton("0", onSymbols = onSymbols)
         NumButton(".", onSymbols = onSymbols)
+
+        NumButton("(", onSymbols = onSymbols)
+        NumButton(")", onSymbols = onSymbols)
+        NumButton("E", onSymbols = onSymbols)
     }
 }
 

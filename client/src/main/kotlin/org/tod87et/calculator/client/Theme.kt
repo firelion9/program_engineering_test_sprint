@@ -1,9 +1,11 @@
 package org.tod87et.calculator.client
 
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Typography
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 
 
 private val md_theme_light_primary = Color(0xFF6750A4)
@@ -88,5 +90,29 @@ private val colors = lightColors(
 
 @Composable
 fun CalculatorTheme(content: @Composable () -> Unit) {
-    MaterialTheme(colors = colors, content = content)
+    MaterialTheme(
+        colors = colors,
+        typography = Typography().scaled(1.4f),
+        content = content
+    )
 }
+
+private fun Typography.scaled(ratio: Float): Typography =
+    copy(
+        h1 = h1.scaled(ratio),
+        h2 = h2.scaled(ratio),
+        h3 = h3.scaled(ratio),
+        h4 = h4.scaled(ratio),
+        h5 = h5.scaled(ratio),
+        h6 = h6.scaled(ratio),
+        subtitle1 = subtitle1.scaled(ratio),
+        subtitle2 = subtitle2.scaled(ratio),
+        body1 = body1.scaled(ratio),
+        body2 = body2.scaled(ratio),
+        button = button.scaled(ratio),
+        caption = caption.scaled(ratio),
+        overline = overline.scaled(ratio)
+    )
+
+private fun TextStyle.scaled(ratio: Float): TextStyle =
+    copy(fontSize = fontSize * ratio)

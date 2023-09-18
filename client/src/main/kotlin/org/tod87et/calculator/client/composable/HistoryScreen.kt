@@ -1,6 +1,7 @@
 package org.tod87et.calculator.client.composable
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -71,7 +72,13 @@ fun HistoryScreen(
                             modifier = Modifier.fillMaxWidth(),
                         ) {
                             items(state.historyItems, key = { it.id }) {
-                                HistoryItem(it, state, coroutineScope, modifier = Modifier.padding(2.dp))
+                                HistoryItem(
+                                    it,
+                                    state,
+                                    coroutineScope,
+                                    updateAppState,
+                                    modifier = Modifier.padding(2.dp)
+                                )
                             }
                         }
                     }
@@ -94,13 +101,20 @@ private fun HistoryItem(
     it: ComputationResult,
     state: ApplicationState.HistoryScreen,
     coroutineScope: CoroutineScope,
+    updateAppState: (ApplicationState) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     LaunchedEffect(it.id) {
         state.onItemComposed(coroutineScope, it.id)
     }
     Surface(color = md_theme_light_secondaryContainer, modifier = modifier, shape = MaterialTheme.shapes.medium) {
-        Row(modifier = Modifier.padding(4.dp)) {
+        Row(
+            modifier = Modifier
+                .padding(4.dp)
+                .clickable {
+                    state.onItemClick(it, updateAppState, coroutineScope)
+                }
+        ) {
             Column {
                 Text(
                     "Expression: ${it.expression}",
