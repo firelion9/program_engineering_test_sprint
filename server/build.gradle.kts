@@ -1,7 +1,7 @@
 plugins {
     id("java")
     kotlin("jvm")
-    id("org.jetbrains.kotlin.plugin.serialization") version "1.8.0"
+    id("org.jetbrains.kotlin.plugin.serialization")
     application
 }
 
@@ -16,7 +16,7 @@ dependencies {
     testImplementation(platform("org.junit:junit-bom:5.9.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    testImplementation("io.zonky.test:embedded-postgres:2.0.4")
+    implementation("io.zonky.test:embedded-postgres:2.0.4")
 
     implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")

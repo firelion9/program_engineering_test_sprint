@@ -63,7 +63,7 @@ class ServerTest {
                 json()
             }
         }
-        val requests = arrayOf("1 + 2" to 3, "6/2*(1+2)" to 9, "5^-1" to 0.2)
+        val requests = arrayOf("1 + 2" to 3.0, "6/2*(1+2)" to 9.0, "5^-1" to 0.2)
         val buffer = mutableListOf<ComputationResult>()
         requests.forEach { element ->
             val expression = element.first
@@ -121,7 +121,7 @@ class ServerTest {
                 json()
             }
         }
-        val requests = arrayOf("5" to 5, "((10 + 2) / (6))" to 2, "10^0" to 1)
+        val requests = arrayOf("5" to 5.0, "((10 + 2) / (6))" to 2.0, "10^0" to 1.0)
         val buffer = mutableListOf<ComputationResult>()
         requests.forEach { element ->
             val expression = element.first
@@ -155,8 +155,8 @@ class ServerTest {
             }
         }
         val requests = arrayOf(
-            "1 + 2" to 3, "6/2*(1+2)" to 9, "5^-1" to 0.2,
-            "5" to 5, "((10 + 2) / (6))" to 2, "10^0" to 1,
+            "1 + 2" to 3.0, "6/2*(1+2)" to 9.0, "5^-1" to 0.2,
+            "5" to 5.0, "((10 + 2) / (6))" to 2.0, "10^0" to 1.0,
         )
         val buffer = mutableListOf<ComputationResult>()
         requests.forEach { element ->
