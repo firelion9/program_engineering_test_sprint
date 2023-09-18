@@ -29,6 +29,7 @@ dependencies {
 
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:$kotlinxDatetimeVersion")
     implementation(project(":shared"))
+    implementation("org.slf4j:slf4j-nop:2.0.5")
 }
 
 compose.desktop {
