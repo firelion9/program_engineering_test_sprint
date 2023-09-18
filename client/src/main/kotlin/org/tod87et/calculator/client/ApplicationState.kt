@@ -15,9 +15,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.tod87et.calculator.client.api.ApiResult
 import org.tod87et.calculator.client.api.AppApi
-import org.tod87et.calculator.client.api.ComputationResult
 import org.tod87et.calculator.client.api.LocalAppApi
 import org.tod87et.calculator.client.api.NetworkAppApi
+import org.tod87et.calculator.shared.models.ComputationResult
 
 sealed interface ApplicationState {
     val snackbarHostState: SnackbarHostState

@@ -2,6 +2,7 @@ package org.tod87et.calculator.client.api
 
 import kotlinx.coroutines.delay
 import kotlinx.datetime.Clock
+import org.tod87et.calculator.shared.models.ComputationResult
 import kotlin.math.max
 
 class LocalAppApi : AppApi {

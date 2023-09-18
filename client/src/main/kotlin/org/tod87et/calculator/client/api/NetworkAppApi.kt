@@ -15,6 +15,8 @@ import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import io.ktor.http.path
 import kotlinx.serialization.Serializable
+import org.tod87et.calculator.shared.models.ComputationResult
+import org.tod87et.calculator.shared.models.ComputeRequest
 import java.util.logging.Level
 import java.util.logging.Logger
 
@@ -33,7 +35,7 @@ class NetworkAppApi(
                     }
                     method = HttpMethod.Post
                     contentType(ContentType.Application.Json)
-                    setBody(ComputeRequestBody(expression))
+                    setBody(ComputeRequest(expression))
                 }
 
                 parseResponse(response)
@@ -104,9 +106,6 @@ class NetworkAppApi(
             .apply(builder)
             .let { url(it.build()) }
     }
-
-    @Serializable
-    private data class ComputeRequestBody(val expression: String)
 
     companion object {
         private const val COMPUTE_PATH = "api/v1/calculator/compute"
