@@ -12,6 +12,7 @@ version = "1.0.0"
 val coroutinesVersion get() = rootProject.extra["kotlinx.coroutines.version"]
 val serializationVersion get() = rootProject.extra["kotlinx.serialization.version"]
 val kTorVersion get() = rootProject.extra["ktor.version"]
+val kotlinxDatetimeVersion = extra["kotlinx-datetime.version"] as String
 
 dependencies {
     // Note, if you develop a library, you should use compose.desktop.common.
@@ -25,6 +26,10 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$serializationVersion")
     implementation("io.ktor:ktor-client-content-negotiation:$kTorVersion")
     implementation("io.ktor:ktor-serialization-kotlinx-json:$kTorVersion")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:$kotlinxDatetimeVersion")
+    implementation(project(":shared"))
+    implementation("org.slf4j:slf4j-nop:2.0.5")
 }
 
 compose.desktop {

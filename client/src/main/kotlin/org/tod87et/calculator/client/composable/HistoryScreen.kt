@@ -26,8 +26,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
 import org.tod87et.calculator.client.ApplicationState
-import org.tod87et.calculator.client.api.ComputationResult
 import org.tod87et.calculator.client.md_theme_light_secondaryContainer
+import org.tod87et.calculator.shared.models.ComputationResult
 
 @Composable
 fun HistoryScreen(

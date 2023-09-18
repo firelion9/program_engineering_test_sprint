@@ -25,3 +25,4 @@ dependencyResolutionManagement {
 rootProject.name = "program_engineering_test_sprint"
 include("server")
 include("client")
+include("shared")
