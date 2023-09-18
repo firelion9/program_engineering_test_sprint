@@ -189,9 +189,9 @@ sealed interface ApplicationState {
                             if (newItemsRes.result.isEmpty()) {
                                 hasMoreItemsState.value = false
                             }
-                            val lastTimestamp = itemsCache.lastOrNull()?.timestamp ?: Long.MAX_VALUE
+                            val lastTimestamp = itemsCache.lastOrNull()?.timestamp
                             itemsCache += newItemsRes.result.asReversed()
-                                .asSequence().filter { it.timestamp < lastTimestamp }
+                                .asSequence().filter { lastTimestamp == null || it.timestamp < lastTimestamp }
                         }
                     }
                 } finally {
