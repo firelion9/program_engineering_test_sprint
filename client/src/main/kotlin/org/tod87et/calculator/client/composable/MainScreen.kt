@@ -37,7 +37,9 @@ import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.key.utf16CodePoint
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import org.tod87et.calculator.client.ApplicationState
 import org.tod87et.calculator.client.CalculatorTheme
 import org.tod87et.calculator.client.api.ApiResult
@@ -142,6 +144,7 @@ fun MainScreen(
                         Text("Expression")
                     },
                     singleLine = true,
+                    textStyle = TextStyle.Default.copy(fontSize = 32.sp),
                     modifier = Modifier
                         .fillMaxWidth()
                         .focusRequester(focusRequester),
@@ -157,6 +160,7 @@ fun MainScreen(
                     label = {
                         Text("Result")
                     },
+                    textStyle = TextStyle.Default.copy(fontSize = 32.sp),
                     modifier = Modifier.fillMaxWidth(),
                 )
                 NumPad(
