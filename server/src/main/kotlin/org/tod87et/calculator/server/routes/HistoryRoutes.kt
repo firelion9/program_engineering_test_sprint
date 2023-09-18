@@ -33,15 +33,13 @@ fun Route.historyRouting() {
                         "OK",
                         status = HttpStatusCode.OK
                     )
-                }
-                else {
+                } else {
                     return@delete call.respondText(
                         "Formula not found",
                         status = HttpStatusCode.NotFound
                     )
                 }
-            }
-            catch (e : Exception) {
+            } catch (e : Exception) {
                 return@delete call.respondText(
                     "Undefined server error",
                     status = HttpStatusCode.InternalServerError

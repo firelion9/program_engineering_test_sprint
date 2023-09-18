@@ -26,8 +26,7 @@ fun Route.calculatorRouting() {
             try {
                 val response = database.insertFormula(expression, result)
                 return@post call.respond(HttpStatusCode.OK, response)
-            }
-            catch (e : Exception) {
+            } catch (e : Exception) {
                 if (e.message != null) {
                     val exceptionMessage = e.message ?: ""
                     return@post call.respondText(
