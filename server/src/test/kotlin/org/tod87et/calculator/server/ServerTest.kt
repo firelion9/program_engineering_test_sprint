@@ -12,9 +12,8 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.tod87et.calculator.server.database.FormulasDb
-import org.tod87et.calculator.server.models.ComputationResult
-import org.tod87et.calculator.server.models.ComputeRequest
-import org.tod87et.calculator.server.models.toComputationResult
+import org.tod87et.calculator.shared.models.ComputationResult
+import org.tod87et.calculator.shared.models.ComputeRequest
 import javax.sql.DataSource
 import kotlin.test.*
 
@@ -51,9 +50,9 @@ class ServerTest {
         val body = response.body<ComputationResult>()
         //assertEquals(3.0, body.result, "Calculator computes incorrect")
         assertEquals(expression, body.expression, "Doesn't return correct expression")
-        val entry = database.selectAllFormulas().find { it.id == body.id.toInt() }
+        val entry = database.selectAllFormulas().find { it.id == body.id }
         assertNotNull(entry, "Didn't find entry with ${body.id}")
-        assertEquals(entry.toComputationResult(), body, "Entry is not the same by id=${body.id}")
+        assertEquals(entry, body, "Entry is not the same by id=${body.id}")
     }
 
     @Test

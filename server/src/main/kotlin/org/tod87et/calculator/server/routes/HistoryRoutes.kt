@@ -5,7 +5,6 @@ import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.tod87et.calculator.server.database
-import org.tod87et.calculator.server.models.toComputationResult
 
 fun Route.historyRouting() {
     route("/history") {
@@ -16,8 +15,7 @@ fun Route.historyRouting() {
 
                 try {
                     val dbResponse = database.selectFormulas(limit, offset.toLong())
-                    val result = dbResponse.map {it.toComputationResult()}
-                    return@get call.respond(HttpStatusCode.OK, result)
+                    return@get call.respond(HttpStatusCode.OK, dbResponse)
                 } catch (e: Exception) {
                     return@get call.respondText(
                         e.message ?: "Undefined server error",

@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.tod87et.calculator.shared.models.ComputationResult
 import javax.sql.DataSource
 
 class FormulasDbTest {
@@ -17,7 +18,7 @@ class FormulasDbTest {
         "10 * 3 - 4 ^ 2" to 14.0
     )
 
-    private fun List<FormulaEntry>.parse() = map { it.formula to it.result }
+    private fun List<ComputationResult>.parse() = map { it.expression to it.result }
 
     @BeforeEach
     fun insertFormulas() {
@@ -71,7 +72,7 @@ class FormulasDbTest {
 
     @Test
     fun deleteTest() {
-        database.deleteFormula(database.selectFormulas(1).single().id)
+        database.deleteFormula(database.selectFormulas(1).single().id.toInt())
 
         val actual = database.selectAllFormulas().parse()
         val expected = formulas.dropLast(1)

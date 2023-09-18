@@ -7,8 +7,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.tod87et.calculator.server.database
 import org.tod87et.calculator.server.eval
-import org.tod87et.calculator.server.models.ComputeRequest
-import org.tod87et.calculator.server.models.toComputationResult
+import org.tod87et.calculator.shared.models.ComputeRequest
 import kotlin.Exception
 
 
@@ -26,7 +25,7 @@ fun Route.calculatorRouting() {
                     )
                 }
                 try {
-                    val response = database.insertFormula(expression, result).toComputationResult()
+                    val response = database.insertFormula(expression, result)
                     return@post call.respond(HttpStatusCode.OK, response)
                 }
                 catch (e : Exception) {
