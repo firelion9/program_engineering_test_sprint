@@ -28,17 +28,8 @@ fun Route.historyRouting() {
                 status = HttpStatusCode.BadRequest
             )
             try {
-                if (database.deleteFormula(id)) {
-                    call.respondText(
-                        "OK",
-                        status = HttpStatusCode.OK
-                    )
-                } else {
-                    call.respondText(
-                        "Formula not found",
-                        status = HttpStatusCode.NotFound
-                    )
-                }
+                val isDeleted = database.deleteFormula(id)
+                call.respond(if (isDeleted) HttpStatusCode.OK else HttpStatusCode.NotFound)
             } catch (e : Exception) {
                 call.respondText(
                     "Undefined server error",
