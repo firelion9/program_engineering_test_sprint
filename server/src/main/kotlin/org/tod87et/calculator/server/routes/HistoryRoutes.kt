@@ -30,11 +30,23 @@ fun Route.historyRouting() {
         }
         route("/remove") {
             delete("{id?}") {
-                val id = call.parameters["id"] ?: return@delete call.respondText(
+                val id = call.parameters["id"]?.toIntOrNull() ?: return@delete call.respondText(
                     "Missing id",
                     status = HttpStatusCode.BadRequest
                 )
-                //TODO
+                if(database.deleteFormula(id)) {
+                    return@delete call.respondText(
+                        "OK",
+                        status = HttpStatusCode.OK
+                    )
+                }
+                else {
+                    return@delete call.respondText(
+                        "Formula not found",
+                        status = HttpStatusCode.NotFound
+                    )
+                }
+
             }
         }
     }
