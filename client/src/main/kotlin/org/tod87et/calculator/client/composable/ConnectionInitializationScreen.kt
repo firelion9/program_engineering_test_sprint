@@ -42,7 +42,6 @@ fun ConnectionInitializationScreen(
 
     Box(
         modifier = modifier
-            .fillMaxSize()
             .focusable()
             .onPreviewKeyEvent {
                 if (it.type == KeyEventType.KeyDown && it.key == Key.Enter) {
@@ -67,7 +66,7 @@ fun ConnectionInitializationScreen(
                 modifier = Modifier.focusRequester(focusRequester),
             )
 
-            Spacer(modifier = modifier.size(3.dp))
+            Spacer(modifier = Modifier.size(3.dp))
 
             Button(
                 onClick = {

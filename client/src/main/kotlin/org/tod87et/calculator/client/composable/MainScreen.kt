@@ -58,7 +58,6 @@ fun MainScreen(
 
     Box(
         modifier = modifier
-            .fillMaxSize()
             .focusable()
             .onPreviewKeyEvent {
                 if (it.type != KeyEventType.KeyDown) {
@@ -118,7 +117,7 @@ fun MainScreen(
 
                 Text("Current server: ${state.hostString}")
 
-                Spacer(modifier.weight(1f))
+                Spacer(modifier = Modifier.weight(1f))
 
                 OutlinedButton(
                     onClick = {
@@ -130,7 +129,7 @@ fun MainScreen(
             }
 
             Column(
-                modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 TextField(

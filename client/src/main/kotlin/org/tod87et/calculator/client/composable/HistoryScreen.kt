@@ -6,12 +6,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
@@ -22,7 +24,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.CoroutineScope
 import org.tod87et.calculator.client.ApplicationState
+import org.tod87et.calculator.client.api.ComputationResult
+import org.tod87et.calculator.client.md_theme_light_secondaryContainer
 
 @Composable
 fun HistoryScreen(
@@ -66,26 +71,7 @@ fun HistoryScreen(
                             modifier = Modifier.fillMaxWidth(),
                         ) {
                             items(state.historyItems, key = { it.id }) {
-                                LaunchedEffect(it.id) {
-                                    state.onItemComposed(coroutineScope, it.id)
-                                }
-                                Row {
-                                    Column {
-                                        Text("Expression: ${it.expression}", style = MaterialTheme.typography.body1)
-                                        Text("Result: ${it.result}", style = MaterialTheme.typography.body2)
-                                    }
-                                    Spacer(modifier = Modifier.weight(1f))
-                                    IconButton(
-                                        onClick = {
-                                            state.removeItem(coroutineScope, it.id)
-                                        }
-                                    ) {
-                                        Image(
-                                            Icons.Outlined.Close,
-                                            "remove"
-                                        )
-                                    }
-                                }
+                                HistoryItem(it, state, coroutineScope, modifier = Modifier.padding(2.dp))
                             }
                         }
                     }
@@ -98,6 +84,40 @@ fun HistoryScreen(
                         Text("History is empty", style = MaterialTheme.typography.subtitle2)
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun HistoryItem(
+    it: ComputationResult,
+    state: ApplicationState.HistoryScreen,
+    coroutineScope: CoroutineScope,
+    modifier: Modifier = Modifier,
+) {
+    LaunchedEffect(it.id) {
+        state.onItemComposed(coroutineScope, it.id)
+    }
+    Surface(color = md_theme_light_secondaryContainer, modifier = modifier, shape = MaterialTheme.shapes.medium) {
+        Row(modifier = Modifier.padding(4.dp)) {
+            Column {
+                Text(
+                    "Expression: ${it.expression}",
+                    style = MaterialTheme.typography.body1
+                )
+                Text("Result: ${it.result}", style = MaterialTheme.typography.body2)
+            }
+            Spacer(modifier = Modifier.weight(1f))
+            IconButton(
+                onClick = {
+                    state.removeItem(coroutineScope, it.id)
+                }
+            ) {
+                Image(
+                    Icons.Outlined.Close,
+                    "remove"
+                )
             }
         }
     }

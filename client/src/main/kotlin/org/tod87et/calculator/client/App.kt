@@ -2,6 +2,7 @@ package org.tod87et.calculator.client
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.material.rememberScaffoldState
@@ -28,7 +29,7 @@ fun App() {
                     )
                 }
 
-                AppRoot(appState, updateAppState)
+                AppRoot(appState, updateAppState, modifier = Modifier.fillMaxSize())
             }
         }
     }
