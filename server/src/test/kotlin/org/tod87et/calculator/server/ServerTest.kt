@@ -1,5 +1,6 @@
 package org.tod87et.calculator.server
 
+import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
@@ -26,8 +27,18 @@ class ServerTest {
     private val calculatorPath = "$apiPath/calculator"
     private val computePath = "$calculatorPath/compute"
 
+    private inline fun testJsonApplication(crossinline body: suspend ApplicationTestBuilder.(HttpClient) -> Unit) = testApplication {
+        val client = createClient {
+            install(ContentNegotiation) {
+                json()
+            }
+        }
+
+        body(client)
+    }
+
     @Test
-    fun checkHistoryRoutes() = testApplication {
+    fun checkHistoryRoutes() = testJsonApplication {client ->
         var response = client.get(listPath)
         assertEquals(HttpStatusCode.OK, response.status)
         response = client.delete(removePath)
@@ -37,12 +48,7 @@ class ServerTest {
     }
 
     @Test
-    fun checkCalculator_200_Ok() = testApplication {
-        val client = createClient {
-            install(ContentNegotiation) {
-                json()
-            }
-        }
+    fun checkCalculator_200_Ok() = testJsonApplication { client->
         val expression = "1+2"
         val response = client.post(computePath) {
             contentType(ContentType.Application.Json)
@@ -58,12 +64,7 @@ class ServerTest {
     }
 
     @Test
-    fun checkHistoryGet() = testApplication {
-        val client = createClient {
-            install(ContentNegotiation) {
-                json()
-            }
-        }
+    fun checkHistoryGet() = testJsonApplication {client ->
         val requests = arrayOf("1 + 2" to 3.0, "6/2*(1+2)" to 9.0, "5^-1" to 0.2)
         val buffer = mutableListOf<ComputationResult>()
         requests.forEach { element ->
@@ -116,12 +117,7 @@ class ServerTest {
     }
 
     @Test
-    fun checkHistoryDelete() = testApplication {
-        val client = createClient {
-            install(ContentNegotiation) {
-                json()
-            }
-        }
+    fun checkHistoryDelete() = testJsonApplication {client ->
         val requests = arrayOf("5" to 5.0, "((10 + 2) / (6))" to 2.0, "10^0" to 1.0)
         val buffer = mutableListOf<ComputationResult>()
         requests.forEach { element ->
@@ -149,12 +145,7 @@ class ServerTest {
     }
 
     @Test
-    fun checkParserResult() = testApplication {
-        val client = createClient {
-            install(ContentNegotiation) {
-                json()
-            }
-        }
+    fun checkParserResult() = testJsonApplication {client ->
         val requests = arrayOf(
             "1 + 2" to 3.0, "6/2*(1+2)" to 9.0, "5^-1" to 0.2,
             "5" to 5.0, "((10 + 2) / (6))" to 2.0, "10^0" to 1.0,
@@ -176,12 +167,7 @@ class ServerTest {
     }
 
     @Test
-    fun checkParserBadResult() = testApplication {
-        val client = createClient {
-            install(ContentNegotiation) {
-                json()
-            }
-        }
+    fun checkParserBadResult() = testJsonApplication {client ->
         val expression = "*5"
         val response = client.post(computePath) {
             contentType(ContentType.Application.Json)
