@@ -13,34 +13,32 @@ import kotlin.Exception
 
 fun Route.calculatorRouting() {
     route("/calculator") {
-        route("/compute") {
-            post {
-                val expression = call.receive<ComputeRequest>().expression
-                val result: Double = try {
-                    eval(expression)
-                } catch (e : Exception) {
+        post("/compute") {
+            val expression = call.receive<ComputeRequest>().expression
+            val result: Double = try {
+                eval(expression)
+            } catch (e : Exception) {
+                return@post call.respondText(
+                    e.message ?: "Calculation failed",
+                    status = HttpStatusCode.BadRequest
+                )
+            }
+            try {
+                val response = database.insertFormula(expression, result)
+                return@post call.respond(HttpStatusCode.OK, response)
+            }
+            catch (e : Exception) {
+                if (e.message != null) {
+                    val exceptionMessage = e.message ?: ""
                     return@post call.respondText(
-                        e.message ?: "Calculation failed",
+                        exceptionMessage,
                         status = HttpStatusCode.BadRequest
                     )
-                }
-                try {
-                    val response = database.insertFormula(expression, result)
-                    return@post call.respond(HttpStatusCode.OK, response)
-                }
-                catch (e : Exception) {
-                    if (e.message != null) {
-                        val exceptionMessage = e.message ?: ""
-                        return@post call.respondText(
-                            exceptionMessage,
-                            status = HttpStatusCode.BadRequest
-                        )
-                    } else {
-                        return@post call.respondText(
-                            "Undefined server error",
-                            status = HttpStatusCode.InternalServerError
-                        )
-                    }
+                } else {
+                    return@post call.respondText(
+                        "Undefined server error",
+                        status = HttpStatusCode.InternalServerError
+                    )
                 }
             }
         }

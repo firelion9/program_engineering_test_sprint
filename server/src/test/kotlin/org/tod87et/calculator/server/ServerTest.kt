@@ -31,6 +31,8 @@ class ServerTest {
         var response = client.get(listPath)
         assertEquals(HttpStatusCode.OK, response.status)
         response = client.delete(removePath)
+        assertEquals(HttpStatusCode.NotFound, response.status)
+        response = client.delete("$removePath/aaaa")
         assertEquals(HttpStatusCode.BadRequest, response.status)
     }
 
