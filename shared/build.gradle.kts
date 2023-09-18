@@ -6,6 +6,8 @@ plugins {
 }
 
 group = "org.tod87et.calculator"
+version = "1.0.0"
+
 val ktorVersion = extra["ktor.version"] as String
 val kotlinxDatetimeVersion = extra["kotlinx-datetime.version"] as String
 
