@@ -1,6 +1,7 @@
 package org.tod87et.calculator.client.api
 
 import kotlinx.coroutines.delay
+import kotlinx.datetime.Clock
 import kotlin.math.max
 
 class LocalAppApi : AppApi {
@@ -12,7 +13,7 @@ class LocalAppApi : AppApi {
             return if (expression.isBlank()) {
                 ApiResult.Failure("expression is blank")
             } else {
-                val res = ComputationResult(lastId++.toString(), expression, 42.0, System.currentTimeMillis())
+                val res = ComputationResult(lastId++.toString(), expression, 42.0, Clock.System.now())
                 history.add(res)
                 ApiResult.Success(res)
             }
