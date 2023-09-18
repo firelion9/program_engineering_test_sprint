@@ -1,21 +1,28 @@
 package org.tod87et.calculator.client.api
 
+import kotlinx.coroutines.delay
+import kotlin.math.max
+
 class LocalAppApi : AppApi {
-    private val history = mutableListOf<HistoryItem>()
+    private val history = mutableListOf<ComputationResult>()
+    private var lastId = 0L
     override val calculatorApi: CalculatorApi = object : CalculatorApi {
-        override suspend fun calculate(expression: String): ApiResult<String> {
+        override suspend fun compute(expression: String): ApiResult<ComputationResult> {
+            delay(1000)
             return if (expression.isBlank()) {
                 ApiResult.Failure("expression is blank")
             } else {
-                ApiResult.Success("42")
+                val res = ComputationResult(lastId++.toString(), expression, 42.0, System.currentTimeMillis())
+                history.add(res)
+                ApiResult.Success(res)
             }
         }
     }
 
     override val historyApi: HistoryApi = object : HistoryApi {
-        override suspend fun listHistory(fromId: String?, limit: Int): ApiResult<List<HistoryItem>> = runApi {
-            val startIndex = if (fromId == null) 0 else history.indexOfFirst { it.id == fromId }
-            history.subList(startIndex, (startIndex + limit).coerceAtMost(history.size)).toList()
+        override suspend fun listHistory(offset: Int, limit: Int): ApiResult<List<ComputationResult>> = runApi {
+            val fromIndex = (history.size - offset - limit).coerceAtLeast(0)
+            history.subList(fromIndex, (fromIndex + limit).coerceAtMost(max(0, history.size - offset))).toList()
         }
 
         override suspend fun removeItem(id: String): ApiResult<Unit> = runApi {
