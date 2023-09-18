@@ -237,6 +237,7 @@ private fun NumPad(
 
         NumButton("(", onSymbols = onSymbols)
         NumButton(")", onSymbols = onSymbols)
+        NumButton("E", onSymbols = onSymbols)
     }
 }
 

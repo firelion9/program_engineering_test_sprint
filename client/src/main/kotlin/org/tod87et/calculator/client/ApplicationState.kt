@@ -245,7 +245,7 @@ sealed interface ApplicationState {
         private val expressionChars = setOf(
             *('0'..'9').toList().toTypedArray(),
             '+', '-', '*', '/', '^',
-            '(', ')', '.',
+            '(', ')', '.', 'E', 'e'
         )
     }
 }
