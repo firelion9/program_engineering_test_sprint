@@ -18,6 +18,5 @@ data class ComputationResult(val id: String, val expression: String, val result:
                     && expression == other.expression
                     && abs(result - other.result) < EPS_RESULT
                     && (timestamp - other.timestamp).absoluteValue < EPS_DURATION)
-        }
     }
 }
