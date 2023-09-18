@@ -21,19 +21,14 @@ data class ComputationResult(val id: String, val expression: String, val result:
                         && abs(result - other.result) < EPS_RESULT
                         && (timestamp - other.timestamp).absoluteValue < EPS_DURATION)
             }
-
-            else -> {
-                false
-            }
+            else -> false
         }
     }
 }
 
-fun FormulaEntry.toComputationResult(): ComputationResult {
-    return ComputationResult(
-        id = this.id.toString(),
-        expression = this.formula,
-        result = this.result,
-        timestamp = this.date.toKotlinInstant()
-    )
-}
+fun FormulaEntry.toComputationResult(): ComputationResult = ComputationResult(
+    id = this.id.toString(),
+    expression = this.formula,
+    result = this.result,
+    timestamp = this.date.toKotlinInstant()
+)
